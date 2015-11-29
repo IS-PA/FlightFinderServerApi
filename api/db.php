@@ -1,11 +1,17 @@
 <?php
 
-$_SQL = Array(
+if (!file_exists(dirname(__FILE__).'/config.php')) {
+   $c = "<?php \$_SQL = Array(
    'host' => 'localhost',
    'dbName' => 'flightfinder',
    'user' => 'flightfinder',
    'pw' => 'pw'
-);
+);";
+   $configFile = fopen(dirname(__FILE__).'/config.php', "w") or die("Unable to open file!");
+   fwrite($configFile, $c);
+   fclose($configFile);
+}
+require_once(dirname(__FILE__).'/config.php');
 
 function dbConnect($host, $dbName, $user, $pw) {
    try {//
