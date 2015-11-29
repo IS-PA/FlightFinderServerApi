@@ -1,0 +1,19 @@
+Options +FollowSymLinks
+RewriteEngine On
+ 
+RewriteCond %{SCRIPT_FILENAME} !-d
+RewriteCond %{SCRIPT_FILENAME} !-f
+
+RewriteRule ^flight[/](\d+)(?:[/]?)$ ./flight.php?arg1=$1
+RewriteRule ^flight[/](\d+)[/]([^/]+)(?:[/]?)$ ./flight.php?arg1=$1&arg2=$2
+
+RewriteRule ^airport[/](\d+)(?:[/]?)$ ./airport.php?arg1=$1
+RewriteRule ^airport[/](\d+)[/]([^/]+)(?:[/]?)$ ./airport.php?arg1=$1&arg2=$2
+
+RewriteRule ^flights(?:[/]?)$ ./flights.php
+
+RewriteRule ^airports(?:[/]?)$ ./airports.php
+
+RewriteRule ^tests[/]?$ ./tests.php
+RewriteRule ^tests[/]([^/]+)(?:[/]?)$ ./tests.php?arg1=$1
+RewriteRule ^tests[/]([^/]+)[/]([^/]+)(?:[/]?)$ ./tests.php?arg1=$1&arg2=$2
