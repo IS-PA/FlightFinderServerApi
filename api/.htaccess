@@ -10,8 +10,10 @@ RewriteRule ^flight[/](\d+)[/]([^/]+)(?:[/]?)$ ./flight.php?arg1=$1&arg2=$2
 RewriteRule ^airport[/](\d+)(?:[/]?)$ ./airport.php?arg1=$1
 RewriteRule ^airport[/](\d+)[/]([^/]+)(?:[/]?)$ ./airport.php?arg1=$1&arg2=$2
 
-RewriteRule ^flights(?:[/]?)$ ./flights.php
+RewriteRule ^flights[/]([^/]+)(?:[/]?)$ ./flights.php?arg1=$1
+RewriteRule ^airports[/]([^/]+)(?:[/]?)$ ./airports.php?arg1=$1
 
+RewriteRule ^flights(?:[/]?)$ ./flights.php
 RewriteRule ^airports(?:[/]?)$ ./airports.php
 
 RewriteRule ^tests[/]?$ ./tests.php
