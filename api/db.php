@@ -58,7 +58,7 @@ Getting Row Count: //Only for UPDATE, INSERT, DELETE. Perhaps for SELECT.
    $row_count = $stmt->rowCount();
    echo $row_count.' rows selected';
 Getting the Last Insert Id:
-   $result = $db->exec("INSERT INTO table(firstname, lastname) VAULES('John', 'Doe')");
+   $result = $db->exec("INSERT INTO table(firstname, lastname) VALUES('John', 'Doe')");
    $insertId = $db->lastInsertId();
 Running Simple INSERT, UPDATE, or DELETE statements:
    $affected_rows = $db->exec("UPDATE table SET field='value'");
