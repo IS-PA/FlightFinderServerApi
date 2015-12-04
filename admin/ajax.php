@@ -5,6 +5,10 @@ require('../api/db.php');
 require('../api/utils.php');
 
 
+$stmt = $db->prepare("SELECT * FROM airports");
+$stmt->execute();
+$airports = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 //echo checkParams($_POST, Array('origin', 'destination', 'date', 'time'));exit();
 
 $answer = Array();
@@ -19,6 +23,28 @@ if (isset($_GET['modifyFlight'])) {
    $stmt->bindValue(':origin', $_POST['origin'], PDO::PARAM_INT);
    $stmt->bindValue(':destination', $_POST['destination'], PDO::PARAM_INT);
    $stmt->bindValue(':departure_timestamp', strtotime(str_replace('/', '-', $_POST['date']).' '.$_POST['time']), PDO::PARAM_INT);
+   $stmt->bindValue(':id', $_POST['id'], PDO::PARAM_INT);
+   $stmt->execute();
+   $answer['status'] = 'ok';
+   $answer['msg'] = 'Updated!';
+   echo json_encode($answer);
+   exit();
+} if (isset($_GET['modifyAirport'])) {
+   if (($errorMsg = checkParams($_POST, Array('country', 'displayname', 'id'))) !== true) {
+      $answer['status'] = 'error';
+      $answer['msg'] = $errorMsg;
+      echo json_encode($answer);
+      exit();
+   }
+   if (existsAirportWithName($_POST['displayname'], $airports, Array($_POST['id']))) {
+      $answer['status'] = 'error';
+      $answer['msg'] = 'Some other airport already has that name!';
+      echo json_encode($answer);
+      exit();
+   }
+   $stmt = $db->prepare("UPDATE airports SET country=:country, displayname=:displayname WHERE id=:id");
+   $stmt->bindValue(':country', $_POST['country'], PDO::PARAM_STR);
+   $stmt->bindValue(':displayname', $_POST['displayname'], PDO::PARAM_STR);
    $stmt->bindValue(':id', $_POST['id'], PDO::PARAM_INT);
    $stmt->execute();
    $answer['status'] = 'ok';
@@ -61,6 +87,12 @@ if (isset($_GET['modifyFlight'])) {
    if (($errorMsg = checkParams($_POST, Array('country', 'displayname'))) !== true) {
       $answer['status'] = 'error';
       $answer['msg'] = $errorMsg;
+      echo json_encode($answer);
+      exit();
+   }
+   if (existsAirportWithName($_POST['displayname'], $airports)) {
+      $answer['status'] = 'error';
+      $answer['msg'] = 'Some other airport already has that name!';
       echo json_encode($answer);
       exit();
    }
@@ -122,4 +154,11 @@ function checkParams($origin, $check) {
       }
    }
    return true;
+}
+
+function existsAirportWithName($name, $airports, $ignoreAirports = Array()) {
+   foreach ($airports as $airport) {
+      if (($airport['displayname'] == $name) && !in_array($airport['id'], $ignoreAirports)) return true;
+   }
+   return false;
 }

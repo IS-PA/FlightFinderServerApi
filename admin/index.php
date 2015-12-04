@@ -27,7 +27,6 @@ unset($airports_r);
       <title>Admin Panel: Flight Finder</title>
       <meta charset="UTF-8">
       <!--<meta name="viewport" content="width=device-width, initial-scale=1.0">-->
-      
       <link rel="stylesheet" href="//code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css">
       <link rel="stylesheet" href="https://cdn.datatables.net/1.10.10/css/dataTables.jqueryui.min.css">
       <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
@@ -46,13 +45,43 @@ unset($airports_r);
             cursor: help;
          }
          
-         .ui-autocomplete {
-            z-index: 100000;
+         .ui-autocomplete, .ui-selectmenu-open{
+            z-index: 1000010;
+         }
+         
+         .ui-datepicker {
+            z-index: 1000011 !important;
+         }
+         
+         .ui-selectmenu-menu > ul {
+            height: 200px;
+         }
+         
+         .ui-dialog {
+            z-index: 101 !important;
          }
       </style>
       <script>
          $(document).ready(function(){
             $(document).tooltip();
+            $("input.custom-jui-button")
+               .button()
+               .css({
+                  'margin': '5px'
+               })
+               .click(function(e) {
+                  e.preventDefault();
+               });
+            $('input.custom-jui-textbox')
+               .button()
+               .css({
+                  'font' : 'inherit',
+                  'color' : 'inherit',
+                  'text-align' : 'left',
+                  'outline' : 'none',
+                  'cursor' : 'text',
+                  'margin': '5px'
+            });
             $('#flights').dataTable({
                'iDisplayLength': 100,
                "order": [[ 0, "asc" ]],
@@ -72,25 +101,40 @@ unset($airports_r);
             $(".addFlight").click(function(){
                var popup = $('<div title="Adding Flight!">New Flight:<br>\
                   <form id="addFlight_form" method="post"><fieldset>\
-                     <select name="origin" id="addFlight_form_select_origin" required><option disabled selected> -- Select an origin -- </option><?php
+                     <select name="origin" id="addFlight_form_select_origin" class="custom-jui-select" style="" required><option disabled selected> -- Select an origin -- </option><?php
                         foreach ($airports as $airport) {
                            if (!$airport['id'] == 0) {
                               echo '<option value='.$airport['id'].'>'.htmlspecialchars($airport['displayname'], ENT_QUOTES)."</option>\\\n";
                            }
                         }
                      ?></select> <label for="addFlight_form_select_origin">Origin</label><br>\
-                     <select name="destination" id="addFlight_form_select_destination" required><option disabled selected> -- Select a destination -- </option><?php
+                     <select name="destination" id="addFlight_form_select_destination" class="custom-jui-select" required><option disabled selected> -- Select a destination -- </option><?php
                         foreach ($airports as $airport) {
                            if (!$airport['id'] == 0) {
                               echo '<option value='.$airport['id'].'>'.htmlspecialchars($airport['displayname'], ENT_QUOTES)."</option>\\\n";
                            }
                         }
                      ?></select> <label for="addFlight_form_select_destination">Destination</label><br>\
-                     <input type="text" id="addFlight_form_date" name="date" required> <label for="modifyFlight_form_date">Date (DD/MM/YYYY)</label><br>\
-                     <input type="text" id="addFlight_form_time" name="time" value="00:00" placeholder="HH:mm" required> <label for="addFlight_form_time">Time (HH:mm)</label><br>\
+                     <input type="text" id="addFlight_form_date" class="custom-jui-textbox" name="date" required> <label for="modifyFlight_form_date">Date (DD/MM/YYYY)</label><br>\
+                     <input type="text" id="addFlight_form_time" class="custom-jui-textbox" name="time" value="00:00" placeholder="HH:mm" required> <label for="addFlight_form_time">Time (HH:mm)</label><br>\
                   </fieldset></form>\
                   <p id="popupMsg">...</p>\
                   </div>');
+               popup.find("form").find('input.custom-jui-textbox')
+                  .button()
+                  .css({
+                     'font' : 'inherit',
+                     'color' : 'inherit',
+                     'text-align' : 'left',
+                     'outline' : 'none',
+                     'cursor' : 'text',
+                     'margin': '5px'
+               });
+               popup.find("form").find('select.custom-jui-select')
+                  .css({
+                     'width': '400px'
+                  }).selectmenu();
+               
                popup.find("form").find("input#addFlight_form_date").datepicker($.datepicker.regional["es"]);
                popup.dialog({
                   modal: true,
@@ -125,11 +169,21 @@ unset($airports_r);
             $(".addAirport").click(function(){
                var popup = $('<div title="Adding Airport!">New Airtport:<br>\
                   <form id="addAirport_form" method="post"><fieldset>\
-                     <input type="text" id="addAirport_form_country" name="country" required> <label for="addAirport_form_country">Country</label><br>\
-                     <input type="text" id="addAirport_form_name" name="displayname" required> <label for="addAirport_form_name">Name</label><br>\
+                     <input type="text" id="addAirport_form_country" class="custom-jui-textbox" name="country" required> <label for="addAirport_form_country">Country</label><br>\
+                     <input type="text" id="addAirport_form_name" class="custom-jui-textbox" name="displayname" required> <label for="addAirport_form_name">Name</label><br>\
                   </fieldset></form>\
                   <p id="popupMsg">...</p>\
                   </div>');
+               popup.find("form").find('input.custom-jui-textbox')
+                  .button()
+                  .css({
+                     'font' : 'inherit',
+                     'color' : 'inherit',
+                     'text-align' : 'left',
+                     'outline' : 'none',
+                     'cursor' : 'text',
+                     'margin': '5px'
+               });
                popup.find("form").find("input#addAirport_form_country").autocomplete({source: [
                   <?php foreach ($airports_by_country as $country => $airport) {
                      echo "\"".htmlspecialchars($country, ENT_QUOTES)."\",\n";
@@ -169,28 +223,43 @@ unset($airports_r);
                var currentFlight = this;
                var popup = $('<div title="Modifying Flight!">Flight #' + currentFlight.dataset.flightId + '<br>\
                   <form id="modifyFlight_form" method="post"><fieldset>\
-                     <select name="origin" id="modifyFlight_form_select_origin" required><option disabled selected> -- Select an origin -- </option><?php
+                     <select name="origin" id="modifyFlight_form_select_origin" class="custom-jui-select" required><option disabled selected> -- Select an origin -- </option><?php
                         foreach ($airports as $airport) {
                            if (!$airport['id'] == 0) {
                               echo '<option value='.$airport['id'].'>'.htmlspecialchars($airport['displayname'], ENT_QUOTES)."</option>\\\n";
                            }
                         }
                      ?></select> <label for="modifyFlight_form_select_origin">Origin</label><br>\
-                     <select name="destination" id="modifyFlight_form_select_destination" required><option disabled selected> -- Select a destination -- </option><?php
+                     <select name="destination" id="modifyFlight_form_select_destination" class="custom-jui-select" required><option disabled selected> -- Select a destination -- </option><?php
                         foreach ($airports as $airport) {
                            if (!$airport['id'] == 0) {
                               echo '<option value='.$airport['id'].'>'.htmlspecialchars($airport['displayname'], ENT_QUOTES)."</option>\\\n";
                            }
                         }
                      ?></select> <label for="modifyFlight_form_select_destination">Destination</label><br>\
-                     <input type="text" id="modifyFlight_form_date" name="date" value="'+currentFlight.dataset.flightDate+'" required> <label for="modifyFlight_form_date">Date (DD/MM/YYYY)</label><br>\
-                     <input type="text" id="modifyFlight_form_time" name="time" value="'+currentFlight.dataset.flightTime+'" placeholder="HH:mm" required> <label for="modifyFlight_form_time">Time (HH:mm)</label><br>\
+                     <input type="text" id="modifyFlight_form_date" class="custom-jui-textbox" name="date" value="'+currentFlight.dataset.flightDate+'" required> <label for="modifyFlight_form_date">Date (DD/MM/YYYY)</label><br>\
+                     <input type="text" id="modifyFlight_form_time" class="custom-jui-textbox" name="time" value="'+currentFlight.dataset.flightTime+'" placeholder="HH:mm" required> <label for="modifyFlight_form_time">Time (HH:mm)</label><br>\
                      <input type="hidden" name="id" value="'+currentFlight.dataset.flightId+'">\
                   </fieldset></form>\
                   <p id="popupMsg">...</p>\
                   </div>');
+               popup.find("form").find('input.custom-jui-textbox')
+                  .button()
+                  .css({
+                     'font' : 'inherit',
+                     'color' : 'inherit',
+                     'text-align' : 'left',
+                     'outline' : 'none',
+                     'cursor' : 'text',
+                     'margin': '5px'
+               });
                popup.find("form").find("select#modifyFlight_form_select_origin").find("[value=" + currentFlight.dataset.flightOrigin + "]").attr('selected','selected');
                popup.find("form").find("select#modifyFlight_form_select_destination").find("[value=" + currentFlight.dataset.flightDestination + "]").attr('selected','selected');
+               popup.find("form").find('select.custom-jui-select')
+                  .css({
+                     'width': '400px'
+                  })
+                  .selectmenu();
                popup.find("form").find("input#modifyFlight_form_date").datepicker($.datepicker.regional["es"]);
                popup.dialog({
                   modal: true,
@@ -198,6 +267,61 @@ unset($airports_r);
                   buttons: {
                      "Update": function(){
                         sendAjaxRequest("ajax.php", "modifyFlight", $("#modifyFlight_form").serialize(), {'dialog':this, 'popup':popup},function(data, cb_data){
+                           console.log(data);
+                           if (data["status"] === "ok") {
+                              popup.animate({backgroundColor: "rgb(0, 255, 0, 0.3)"},1000);
+                              $(cb_data['popup']).find("#popupMsg").text(data["msg"]);
+                              $(cb_data['dialog']).dialog('option', 'hide', 'fold');
+                              window.setTimeout(function() {$(cb_data['dialog']).dialog("close");}, 2000);
+                              window.setTimeout(function() {location.reload();}, 2750);
+                           } else if (data["status"] === "error") {
+                              popup.animate({backgroundColor: "rgb(255, 0, 0, 0.3)"},1000);
+                              $(cb_data['popup']).find("#popupMsg").text(data["msg"]);
+                              window.setTimeout(function() {popup.animate({backgroundColor: "#ffffff"},1000);}, 2000);
+                           }
+                        });
+                     },
+                     "Cancel": function(){
+                        $(this).dialog('option', 'hide', 'fade');
+                        $(this).dialog("close");
+                     }
+                  },
+                  show: "fold",
+                  hide: "scale"
+               });
+            });
+            
+            $(".modifyAirport").click(function(){
+               var currentAirport = this;
+               var popup = $('<div title="Modifying Airport!">Airport #' + currentAirport.dataset.airportId + '<br>\
+                  <form id="modifyAirport_form" method="post"><fieldset>\
+                     <input type="text" id="modifyAirport_form_country" class="custom-jui-textbox" name="country" value="' + currentAirport.dataset.airportCountry + '" required> <label for="modifyAirport_form_country">Country</label><br>\
+                     <input type="text" id="modifyAirport_form_name" class="custom-jui-textbox" name="displayname" value="' + currentAirport.dataset.airportDisplayname + '" required> <label for="modifyAirport_form_name">Name</label><br>\
+                     <input type="hidden" name="id" value="'+currentAirport.dataset.airportId+'">\
+                  </fieldset></form>\
+                  <p id="popupMsg">...</p>\
+                  </div>');
+               popup.find("form").find('input.custom-jui-textbox')
+                  .button()
+                  .css({
+                     'font' : 'inherit',
+                     'color' : 'inherit',
+                     'text-align' : 'left',
+                     'outline' : 'none',
+                     'cursor' : 'text',
+                     'margin': '5px'
+               });
+               popup.find("form").find("input#modifyAirport_form_country").autocomplete({source: [
+                  <?php foreach ($airports_by_country as $country => $airport) {
+                     echo "\"".htmlspecialchars($country, ENT_QUOTES)."\",\n";
+                  } ?>""
+               ]});
+               popup.dialog({
+                  modal: true,
+                  width: 600,
+                  buttons: {
+                     "Update": function(){
+                        sendAjaxRequest("ajax.php", "modifyAirport", $("#modifyAirport_form").serialize(), {'dialog':this, 'popup':popup},function(data, cb_data){
                            console.log(data);
                            if (data["status"] === "ok") {
                               popup.animate({backgroundColor: "rgb(0, 255, 0, 0.3)"},1000);
@@ -384,7 +508,7 @@ unset($airports_r);
                         . '<td>'. $airport['country'] ."</td>\n"
                         . '<td>'. $airport['displayname'] ."</td>\n"
                         . '<td style="text-align:center;">'
-                           . '<img src="../img/modify_icon.png" class="modifyAirport adminIcon" title="Modify Airport" data-airport-id="'.$airport['id'].'">'
+                           . '<img src="../img/modify_icon.png" class="modifyAirport adminIcon" title="Modify Airport" data-airport-id="'.$airport['id'].'" data-airport-country="'.$airport['country'].'" data-airport-displayname="'.$airport['displayname'].'">'
                            . '<img src="../img/delete_icon.png" class="deleteAirport adminIcon" title="Delete Airport" data-airport-id="'.$airport['id'].'" style="margin-left:25px;">'
                            . "</td>\n"
                      . "</tr>\n\n";
