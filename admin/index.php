@@ -75,14 +75,14 @@ unset($airports_r);
                      <select name="origin" id="addFlight_form_select_origin" required><option disabled selected> -- Select an origin -- </option><?php
                         foreach ($airports as $airport) {
                            if (!$airport['id'] == 0) {
-                              echo '<option value='.$airport['id'].'>'.htmlspecialchars($airport['displayname'], ENT_QUOTES)."</option>";
+                              echo '<option value='.$airport['id'].'>'.htmlspecialchars($airport['displayname'], ENT_QUOTES)."</option>\\\n";
                            }
                         }
                      ?></select> <label for="addFlight_form_select_origin">Origin</label><br>\
                      <select name="destination" id="addFlight_form_select_destination" required><option disabled selected> -- Select a destination -- </option><?php
                         foreach ($airports as $airport) {
                            if (!$airport['id'] == 0) {
-                              echo '<option value='.$airport['id'].'>'.htmlspecialchars($airport['displayname'], ENT_QUOTES)."</option>";
+                              echo '<option value='.$airport['id'].'>'.htmlspecialchars($airport['displayname'], ENT_QUOTES)."</option>\\\n";
                            }
                         }
                      ?></select> <label for="addFlight_form_select_destination">Destination</label><br>\
@@ -172,14 +172,14 @@ unset($airports_r);
                      <select name="origin" id="modifyFlight_form_select_origin" required><option disabled selected> -- Select an origin -- </option><?php
                         foreach ($airports as $airport) {
                            if (!$airport['id'] == 0) {
-                              echo '<option value='.$airport['id'].'>'.htmlspecialchars($airport['displayname'], ENT_QUOTES)."</option>";
+                              echo '<option value='.$airport['id'].'>'.htmlspecialchars($airport['displayname'], ENT_QUOTES)."</option>\\\n";
                            }
                         }
                      ?></select> <label for="modifyFlight_form_select_origin">Origin</label><br>\
                      <select name="destination" id="modifyFlight_form_select_destination" required><option disabled selected> -- Select a destination -- </option><?php
                         foreach ($airports as $airport) {
                            if (!$airport['id'] == 0) {
-                              echo '<option value='.$airport['id'].'>'.htmlspecialchars($airport['displayname'], ENT_QUOTES)."</option>";
+                              echo '<option value='.$airport['id'].'>'.htmlspecialchars($airport['displayname'], ENT_QUOTES)."</option>\\\n";
                            }
                         }
                      ?></select> <label for="modifyFlight_form_select_destination">Destination</label><br>\
@@ -341,16 +341,16 @@ unset($airports_r);
             foreach ($flights as $flight) {
                if ($flight['id'] == 0) continue;
                echo '<tr>'
-                        . '<td><a name="flight-'. $flight['id'] .'"></a>'. $flight['id'] .'</td>'
-                        . '<td><a class="infolink" href="#airport-'.$flight['origin'].'">['.$flight['origin'].']'. getAirportNameById($flight['origin'], $airports) .' ('.getAirportCountryById($flight['origin'], $airports).')</a></td>'
-                        . '<td><a class="infolink" href="#airport-'.$flight['destination'].'">['.$flight['destination'].']'. getAirportNameById($flight['destination'], $airports) .' ('.getAirportCountryById($flight['destination'], $airports).')</a></td>'
-                        . '<td>'. date("d/m/Y\<br> H:i", $flight['departure_timestamp']) .'</td>'
-                        . '<td>'. $flight['seats'] .'</td>'
+                        . '<td><a name="flight-'. $flight['id'] .'"></a>'. $flight['id'] ."</td>\n"
+                        . '<td><a class="infolink" href="#airport-'.$flight['origin'].'">['.$flight['origin'].']'. getAirportNameById($flight['origin'], $airports) .' ('.getAirportCountryById($flight['origin'], $airports).")</a></td>\n"
+                        . '<td><a class="infolink" href="#airport-'.$flight['destination'].'">['.$flight['destination'].']'. getAirportNameById($flight['destination'], $airports) .' ('.getAirportCountryById($flight['destination'], $airports).")</a></td>\n"
+                        . '<td>'. date("d/m/Y\<br> H:i", $flight['departure_timestamp']) ."</td>\n"
+                        . '<td>'. $flight['seats'] ."</td>\n"
                         . '<td style="text-align:center;">'
                            . '<img src="../img/modify_icon.png" class="modifyFlight adminIcon" title="Modify flight" data-flight-id="'.$flight['id'].'" data-flight-origin='.$flight['origin'].' data-flight-destination='.$flight['destination'].' data-flight-date="'.date("d/m/Y", $flight['departure_timestamp']).'" data-flight-time="'.date("H:i", $flight['departure_timestamp']).'">'
                            . '<img src="../img/delete_icon.png" class="deleteFlight adminIcon" title="Delete flight" data-flight-id="'.$flight['id'].'" style="margin-left:25px;">'
-                           . '</td>'
-                     . '</tr>';
+                           . "</td>\n"
+                     . '</tr>'."\n\n";
             }
             ?>
          </tbody>
@@ -380,14 +380,14 @@ unset($airports_r);
             foreach ($airports as $airport) {
                if ($airport['id'] == 0) continue;
                echo '<tr>'
-                        . '<td><a name="airport-'. $airport['id'] .'"></a>'. $airport['id'] .'</td>'
-                        . '<td>'. $airport['country'] .'</td>'
-                        . '<td>'. $airport['displayname'] .'</td>'
+                        . '<td><a name="airport-'. $airport['id'] .'"></a>'. $airport['id'] ."</td>\n"
+                        . '<td>'. $airport['country'] ."</td>\n"
+                        . '<td>'. $airport['displayname'] ."</td>\n"
                         . '<td style="text-align:center;">'
                            . '<img src="../img/modify_icon.png" class="modifyAirport adminIcon" title="Modify Airport" data-airport-id="'.$airport['id'].'">'
                            . '<img src="../img/delete_icon.png" class="deleteAirport adminIcon" title="Delete Airport" data-airport-id="'.$airport['id'].'" style="margin-left:25px;">'
-                           . '</td>'
-                     . '</tr>';
+                           . "</td>\n"
+                     . "</tr>\n\n";
             }
             ?>
          </tbody>
