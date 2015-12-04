@@ -32,8 +32,15 @@ if (isset($_GET['modifyFlight'])) {
       echo json_encode($answer);
       exit();
    }
+   $stmt = $db->prepare("INSERT INTO flights(origin, destination, departure_timestamp, seats) VALUES(:origin, :destination, :departure_timestamp, :seats)");
+   $stmt->bindValue(':origin', $_POST['origin'], PDO::PARAM_INT);
+   $stmt->bindValue(':destination', $_POST['destination'], PDO::PARAM_INT);
+   $stmt->bindValue(':departure_timestamp', strtotime(str_replace('/', '-', $_POST['date']).' '.$_POST['time']), PDO::PARAM_INT);
+   $stmt->bindValue(':seats', json_encode(Array('1A' => true)), PDO::PARAM_STR);
+   $stmt->execute();
+   $flightId = $db->lastInsertId();
    $answer['status'] = 'ok';
-   $answer['msg'] = 'Done :)';
+   $answer['msg'] = 'Added! New flight id: '.$flightId;
    echo json_encode($answer);
    exit();
 }

@@ -64,7 +64,56 @@ unset($airports_r);
                   }]
             });
             $(".addFlight").click(function(){
-               
+               var popup = $('<div title="Adding Flight!">New Flight:<br>\
+                  <form id="addFlight_form" method="post"><fieldset>\
+                     <select name="origin" id="addFlight_form_select_origin" required><option disabled selected> -- Select an origin -- </option><?php
+                        foreach ($airports as $airport) {
+                           if (!$airport['id'] == 0) {
+                              echo '<option value='.$airport['id'].'>'.htmlspecialchars($airport['displayname'], ENT_QUOTES)."</option>";
+                           }
+                        }
+                     ?></select> <label for="addFlight_form_select_origin">Origin</label><br>\
+                     <select name="destination" id="addFlight_form_select_destination" required><option disabled selected> -- Select a destination -- </option><?php
+                        foreach ($airports as $airport) {
+                           if (!$airport['id'] == 0) {
+                              echo '<option value='.$airport['id'].'>'.htmlspecialchars($airport['displayname'], ENT_QUOTES)."</option>";
+                           }
+                        }
+                     ?></select> <label for="addFlight_form_select_destination">Destination</label><br>\
+                     <input type="text" id="addFlight_form_date" name="date" required> <label for="modifyFlight_form_date">Date (DD/MM/YYYY)</label><br>\
+                     <input type="text" id="addFlight_form_time" name="time" placeholder="HH:mm" required> <label for="addFlight_form_time">Time (HH:mm)</label><br>\
+                  </fieldset></form>\
+                  <p id="popupMsg">...</p>\
+                  </div>');
+               popup.find("form").find("input#addFlight_form_date").datepicker($.datepicker.regional["es"]);
+               popup.dialog({
+                  modal: true,
+                  width: 600,
+                  buttons: {
+                     "Update": function(){
+                        sendAjaxRequest("ajax.php", "addFlight", $("#addFlight_form").serialize(), {'dialog':this, 'popup':popup},function(data, cb_data){
+                           console.log(data);
+                           if (data["status"] === "ok") {
+                              popup.animate({backgroundColor: "rgb(0, 255, 0, 0.3)"},1000);
+                              $(cb_data['popup']).find("#popupMsg").text(data["msg"]);
+                              $(cb_data['dialog']).dialog('option', 'hide', 'fold');
+                              window.setTimeout(function() {$(cb_data['dialog']).dialog("close");}, 2000);
+                              window.setTimeout(function() {location.reload();}, 2750);
+                           } else if (data["status"] === "error") {
+                              popup.animate({backgroundColor: "rgb(255, 0, 0, 0.3)"},1000);
+                              $(cb_data['popup']).find("#popupMsg").text(data["msg"]);
+                              window.setTimeout(function() {popup.animate({backgroundColor: "#ffffff"},1000);}, 2000);
+                           }
+                        });
+                     },
+                     "Cancel": function(){
+                        $(this).dialog('option', 'hide', 'fade');
+                        $(this).dialog("close");
+                     }
+                  },
+                  show: "fold",
+                  hide: "scale"
+               });
             });
             
             $(".modifyFlight").click(function(){
