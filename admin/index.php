@@ -81,7 +81,7 @@ unset($airports_r);
                         }
                      ?></select> <label for="addFlight_form_select_destination">Destination</label><br>\
                      <input type="text" id="addFlight_form_date" name="date" required> <label for="modifyFlight_form_date">Date (DD/MM/YYYY)</label><br>\
-                     <input type="text" id="addFlight_form_time" name="time" placeholder="HH:mm" required> <label for="addFlight_form_time">Time (HH:mm)</label><br>\
+                     <input type="text" id="addFlight_form_time" name="time" value="00:00" placeholder="HH:mm" required> <label for="addFlight_form_time">Time (HH:mm)</label><br>\
                   </fieldset></form>\
                   <p id="popupMsg">...</p>\
                   </div>');
@@ -174,17 +174,30 @@ unset($airports_r);
             });
             
             $(".deleteFlight").click(function(){
-               //console.log($(this));
-               var caja = $('<div title="Deleting Flight!"><h1>[Not finished]</h1><br><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>Flight #' + this.dataset.flightId + ' will be permanently deleted and cannot be recovered. Are you sure?</div>');
-               caja.dialog({
+               var currentFlight = this;
+               var popup = $('<div title="Deleting Flight!"><br><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>Flight #' + this.dataset.flightId + ' will be permanently deleted and cannot be recovered. Are you sure?\
+                  <form  id="deleteFlight_form" method="post"><input type="hidden" name="id" value="'+currentFlight.dataset.flightId+'"></form><p id="popupMsg">...</p>\
+                  </div>');
+               popup.dialog({
                   modal: true,
                   //height:140,
                   width: 600,
                   buttons: {
                      "Delete": function(){
-                        alert("I said\nNot finished!!!!");
-                        $(this).dialog('option', 'hide', 'explode');
-                        //$(this).dialog("close");
+                        sendAjaxRequest("ajax.php", "deleteFlight", $("#deleteFlight_form").serialize(), {'dialog':this, 'popup':popup},function(data, cb_data){
+                           console.log(data);
+                           if (data["status"] === "ok") {
+                              popup.animate({backgroundColor: "rgb(0, 255, 0, 0.3)"},1000);
+                              $(cb_data['popup']).find("#popupMsg").text(data["msg"]);
+                              $(cb_data['dialog']).dialog('option', 'hide', 'explode');
+                              window.setTimeout(function() {$(cb_data['dialog']).dialog("close");}, 2000);
+                              window.setTimeout(function() {location.reload();}, 2750);
+                           } else if (data["status"] === "error") {
+                              popup.animate({backgroundColor: "rgb(255, 0, 0, 0.3)"},1000);
+                              $(cb_data['popup']).find("#popupMsg").text(data["msg"]);
+                              window.setTimeout(function() {popup.animate({backgroundColor: "#ffffff"},1000);}, 2000);
+                           }
+                        });
                      },
                      "Cancel": function(){
                         $(this).dialog('option', 'hide', 'fade');

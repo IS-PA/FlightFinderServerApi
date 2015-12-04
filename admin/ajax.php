@@ -43,6 +43,20 @@ if (isset($_GET['modifyFlight'])) {
    $answer['msg'] = 'Added! New flight id: '.$flightId;
    echo json_encode($answer);
    exit();
+} else if (isset($_GET['deleteFlight'])) {
+   if (($errorMsg = checkParams($_POST, Array('id'))) !== true) {
+      $answer['status'] = 'error';
+      $answer['msg'] = $errorMsg;
+      echo json_encode($answer);
+      exit();
+   }
+   $stmt = $db->prepare("DELETE FROM flights WHERE id=:id");
+   $stmt->bindValue(':id', $_POST['id'], PDO::PARAM_INT);
+   $stmt->execute();
+   $answer['status'] = 'ok';
+   $answer['msg'] = 'Deleted!';
+   echo json_encode($answer);
+   exit();
 }
 
 $answer['status'] = 'error';
