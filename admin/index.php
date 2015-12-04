@@ -48,61 +48,73 @@ unset($airports_r);
       <script>
          $(document).ready(function(){
             $('#flights').dataTable({
-               'iDisplayLength': 100
+               'iDisplayLength': 100,
+               "order": [[ 0, "asc" ]],
+               "aoColumnDefs": [{
+                     "bSortable": false,
+                     "aTargets": [4, 5]
+                  }]
             });
             $('#airports').dataTable({
-               'iDisplayLength': 100
+               'iDisplayLength': 100,
+               "order": [[ 0, "asc" ]],
+               "aoColumnDefs": [{
+                     "bSortable": false,
+                     "aTargets": [3]
+                  }]
+            });
+            $(".addFlight").click(function(){
+               
             });
             
-            
             $(".modifyFlight").click(function(){
-               //console.log($(this));
                var currentFlight = this;
                var popup = $('<div title="Modifying Flight!">Flight #' + currentFlight.dataset.flightId + '<br>\
                   <form id="modifyFlight_form" method="post"><fieldset>\
-                     <select name="origin" id="modifyFlight_form_select_origin"><option disabled selected> -- Select an origin -- </option><?php
+                     <select name="origin" id="modifyFlight_form_select_origin" required><option disabled selected> -- Select an origin -- </option><?php
                         foreach ($airports as $airport) {
                            if (!$airport['id'] == 0) {
                               echo '<option value='.$airport['id'].'>'.htmlspecialchars($airport['displayname'], ENT_QUOTES)."</option>";
                            }
                         }
                      ?></select> <label for="modifyFlight_form_select_origin">Origin</label><br>\
-                     <select name="destination" id="modifyFlight_form_select_destination"><option disabled selected> -- Select a destination -- </option><?php
+                     <select name="destination" id="modifyFlight_form_select_destination" required><option disabled selected> -- Select a destination -- </option><?php
                         foreach ($airports as $airport) {
                            if (!$airport['id'] == 0) {
                               echo '<option value='.$airport['id'].'>'.htmlspecialchars($airport['displayname'], ENT_QUOTES)."</option>";
                            }
                         }
                      ?></select> <label for="modifyFlight_form_select_destination">Destination</label><br>\
-                     <input type="text" id="modifyFlight_form_date" name="date" value="'+currentFlight.dataset.flightDate+'"> <label for="modifyFlight_form_date">Date (DD/MM/YYYY)</label><br>\
-                     <input type="text" id="modifyFlight_form_time" name="time" value="'+currentFlight.dataset.flightTime+'" placeholder="HH:mm"> <label for="modifyFlight_form_time">Time (HH:mm)</label><br>\
-                     <input type="hidden" name="id" value="'+currentFlight.dataset.flightId+'"></input>\
+                     <input type="text" id="modifyFlight_form_date" name="date" value="'+currentFlight.dataset.flightDate+'" required> <label for="modifyFlight_form_date">Date (DD/MM/YYYY)</label><br>\
+                     <input type="text" id="modifyFlight_form_time" name="time" value="'+currentFlight.dataset.flightTime+'" placeholder="HH:mm" required> <label for="modifyFlight_form_time">Time (HH:mm)</label><br>\
+                     <input type="hidden" name="id" value="'+currentFlight.dataset.flightId+'">\
                   </fieldset></form>\
+                  <p id="popupMsg">...</p>\
                   </div>');
                popup.find("form").find("select#modifyFlight_form_select_origin").find("[value=" + currentFlight.dataset.flightOrigin + "]").attr('selected','selected');
                popup.find("form").find("select#modifyFlight_form_select_destination").find("[value=" + currentFlight.dataset.flightDestination + "]").attr('selected','selected');
-               popup.find("form").find("input#modifyFlight_form_date").datepicker($.datepicker.regional["fr"]);
+               popup.find("form").find("input#modifyFlight_form_date").datepicker($.datepicker.regional["es"]);
                popup.dialog({
                   modal: true,
                   width: 600,
                   buttons: {
                      "Update": function(){
-                        //alert("I said\nNot finished!!!!");
                         sendAjaxRequest("ajax.php", "modifyFlight", $("#modifyFlight_form").serialize(), {'dialog':this, 'popup':popup},function(data, cb_data){
                            console.log(data);
-                           if (true) {
+                           if (data["status"] === "ok") {
                               popup.animate({backgroundColor: "rgb(0, 255, 0, 0.3)"},1000);
+                              $(cb_data['popup']).find("#popupMsg").text(data["msg"]);
                               $(cb_data['dialog']).dialog('option', 'hide', 'fold');
-                              window.setTimeout(function() {$(cb_data['dialog']).dialog("close");}, 1000);
-                              window.setTimeout(function() {location.reload();}, 1750);
-                           } else {
+                              window.setTimeout(function() {$(cb_data['dialog']).dialog("close");}, 2000);
+                              window.setTimeout(function() {location.reload();}, 2750);
+                           } else if (data["status"] === "error") {
                               popup.animate({backgroundColor: "rgb(255, 0, 0, 0.3)"},1000);
-                              window.setTimeout(function() {popup.animate({backgroundColor: "#ffffff"},1000);}, 1000);
+                              $(cb_data['popup']).find("#popupMsg").text(data["msg"]);
+                              window.setTimeout(function() {popup.animate({backgroundColor: "#ffffff"},1000);}, 2000);
                            }
                         });
                      },
                      "Cancel": function(){
-                        
                         $(this).dialog('option', 'hide', 'fade');
                         $(this).dialog("close");
                      }
@@ -143,7 +155,7 @@ unset($airports_r);
                data: postData,
                dataType: "json",
                success: function(data, status) {
-                  //console.log(data);
+                  //console.log(data);//return;
                   cb(data, cb_data);
                },
                error: function(request, status) {
@@ -155,7 +167,7 @@ unset($airports_r);
       </script>
    </head>
    <body>
-      <h3>Flights (#<?php echo count($flights)-1; ?>) <img src="../img/add_icon.png" title="Add new flight" class="adminIcon"></h3> 
+      <h3>Flights (#<?php echo count($flights)-1; ?>) <img src="../img/add_icon.png" class="addFlight adminIcon" title="Add new flight" class="adminIcon"></h3> 
       <table id="flights" class="display" cellspacing="0" width="100%">
          <thead>
             <tr>
