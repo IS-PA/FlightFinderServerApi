@@ -57,6 +57,22 @@ if (isset($_GET['modifyFlight'])) {
    $answer['msg'] = 'Deleted!';
    echo json_encode($answer);
    exit();
+}  else if (isset($_GET['addAirport'])) {
+   if (($errorMsg = checkParams($_POST, Array('country', 'displayname'))) !== true) {
+      $answer['status'] = 'error';
+      $answer['msg'] = $errorMsg;
+      echo json_encode($answer);
+      exit();
+   }
+   $stmt = $db->prepare("INSERT INTO airports(country, displayname) VALUES(:country, :displayname)");
+   $stmt->bindValue(':country', $_POST['country'], PDO::PARAM_STR);
+   $stmt->bindValue(':displayname', $_POST['displayname'], PDO::PARAM_STR);
+   $stmt->execute();
+   $airportId = $db->lastInsertId();
+   $answer['status'] = 'ok';
+   $answer['msg'] = 'Added! New airport id: '.$airportId;
+   echo json_encode($answer);
+   exit();
 }
 
 $answer['status'] = 'error';

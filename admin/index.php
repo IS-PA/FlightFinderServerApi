@@ -14,11 +14,12 @@ $stmt = $db->prepare("SELECT * FROM airports");
 $stmt->execute();
 $airports_r = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $airports = Array();
+$airports_by_country = Array();
 foreach ($airports_r as $airport) {
    $airports[$airport['id']] = $airport;
+   $airports_by_country[$airport['country']] = $airport;
 }
 unset($airports_r);
-
 
 ?><!DOCTYPE html>
 <html>
@@ -44,9 +45,14 @@ unset($airports_r);
          .infolink {
             cursor: help;
          }
+         
+         .ui-autocomplete {
+            z-index: 100000;
+         }
       </style>
       <script>
          $(document).ready(function(){
+            $(document).tooltip();
             $('#flights').dataTable({
                'iDisplayLength': 100,
                "order": [[ 0, "asc" ]],
@@ -92,6 +98,49 @@ unset($airports_r);
                   buttons: {
                      "Update": function(){
                         sendAjaxRequest("ajax.php", "addFlight", $("#addFlight_form").serialize(), {'dialog':this, 'popup':popup},function(data, cb_data){
+                           console.log(data);
+                           if (data["status"] === "ok") {
+                              popup.animate({backgroundColor: "rgb(0, 255, 0, 0.3)"},1000);
+                              $(cb_data['popup']).find("#popupMsg").text(data["msg"]);
+                              $(cb_data['dialog']).dialog('option', 'hide', 'fold');
+                              window.setTimeout(function() {$(cb_data['dialog']).dialog("close");}, 2000);
+                              window.setTimeout(function() {location.reload();}, 2750);
+                           } else if (data["status"] === "error") {
+                              popup.animate({backgroundColor: "rgb(255, 0, 0, 0.3)"},1000);
+                              $(cb_data['popup']).find("#popupMsg").text(data["msg"]);
+                              window.setTimeout(function() {popup.animate({backgroundColor: "#ffffff"},1000);}, 2000);
+                           }
+                        });
+                     },
+                     "Cancel": function(){
+                        $(this).dialog('option', 'hide', 'fade');
+                        $(this).dialog("close");
+                     }
+                  },
+                  show: "fold",
+                  hide: "scale"
+               });
+            });
+            
+            $(".addAirport").click(function(){
+               var popup = $('<div title="Adding Airport!">New Airtport:<br>\
+                  <form id="addAirport_form" method="post"><fieldset>\
+                     <input type="text" id="addAirport_form_country" name="country" required> <label for="addAirport_form_country">Country</label><br>\
+                     <input type="text" id="addAirport_form_name" name="displayname" required> <label for="addAirport_form_name">Name</label><br>\
+                  </fieldset></form>\
+                  <p id="popupMsg">...</p>\
+                  </div>');
+               popup.find("form").find("input#addAirport_form_country").autocomplete({source: [
+                  <?php foreach ($airports_by_country as $country => $airport) {
+                     echo "\"".htmlspecialchars($country, ENT_QUOTES)."\",\n";
+                  } ?>""
+               ]});
+               popup.dialog({
+                  modal: true,
+                  width: 600,
+                  buttons: {
+                     "Update": function(){
+                        sendAjaxRequest("ajax.php", "addAirport", $("#addAirport_form").serialize(), {'dialog':this, 'popup':popup},function(data, cb_data){
                            console.log(data);
                            if (data["status"] === "ok") {
                               popup.animate({backgroundColor: "rgb(0, 255, 0, 0.3)"},1000);
@@ -229,7 +278,7 @@ unset($airports_r);
       </script>
    </head>
    <body>
-      <h3>Flights (#<?php echo count($flights)-1; ?>) <img src="../img/add_icon.png" class="addFlight adminIcon" title="Add new flight" class="adminIcon"></h3> 
+      <h3>Flights (#<?php echo count($flights)-1; ?>) <img src="../img/add_icon.png" class="addFlight adminIcon" title="Add new flight"></h3> 
       <table id="flights" class="display" cellspacing="0" width="100%">
          <thead>
             <tr>
@@ -272,7 +321,7 @@ unset($airports_r);
       </table>
       
       
-      <h3>Airports (#<?php echo count($airports)-1; ?>)</h3>
+      <h3>Airports (#<?php echo count($airports)-1; ?>) <img src="../img/add_icon.png" class="addAirport adminIcon" title="Add new airport"></h3>
       <table id="airports" class="display" cellspacing="0" width="100%">
          <thead>
             <tr>
