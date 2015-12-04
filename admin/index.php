@@ -224,7 +224,7 @@ unset($airports_r);
             
             $(".deleteFlight").click(function(){
                var currentFlight = this;
-               var popup = $('<div title="Deleting Flight!"><br><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>Flight #' + this.dataset.flightId + ' will be permanently deleted and cannot be recovered. Are you sure?\
+               var popup = $('<div title="Deleting Flight!"><br><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>Flight #' + currentFlight.dataset.flightId + ' will be permanently deleted and cannot be recovered. Are you sure?\
                   <form  id="deleteFlight_form" method="post"><input type="hidden" name="id" value="'+currentFlight.dataset.flightId+'"></form><p id="popupMsg">...</p>\
                   </div>');
                popup.dialog({
@@ -234,6 +234,42 @@ unset($airports_r);
                   buttons: {
                      "Delete": function(){
                         sendAjaxRequest("ajax.php", "deleteFlight", $("#deleteFlight_form").serialize(), {'dialog':this, 'popup':popup},function(data, cb_data){
+                           console.log(data);
+                           if (data["status"] === "ok") {
+                              popup.animate({backgroundColor: "rgb(0, 255, 0, 0.3)"},1000);
+                              $(cb_data['popup']).find("#popupMsg").text(data["msg"]);
+                              $(cb_data['dialog']).dialog('option', 'hide', 'explode');
+                              window.setTimeout(function() {$(cb_data['dialog']).dialog("close");}, 2000);
+                              window.setTimeout(function() {location.reload();}, 2750);
+                           } else if (data["status"] === "error") {
+                              popup.animate({backgroundColor: "rgb(255, 0, 0, 0.3)"},1000);
+                              $(cb_data['popup']).find("#popupMsg").text(data["msg"]);
+                              window.setTimeout(function() {popup.animate({backgroundColor: "#ffffff"},1000);}, 2000);
+                           }
+                        });
+                     },
+                     "Cancel": function(){
+                        $(this).dialog('option', 'hide', 'fade');
+                        $(this).dialog("close");
+                     }
+                  },
+                  show: "pulsate",
+                  hide: "scale"
+               });
+            });
+            
+            $(".deleteAirport").click(function(){
+               var currentAirport = this;
+               var popup = $('<div title="Deleting Airport!"><br><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>Airport #' + currentAirport.dataset.airportId + ' will be permanently deleted and cannot be recovered. Are you sure?\
+                  <form  id="deleteAirport_form" method="post"><input type="hidden" name="id" value="'+currentAirport.dataset.airportId+'"></form><p id="popupMsg">...</p>\
+                  </div>');
+               popup.dialog({
+                  modal: true,
+                  //height:140,
+                  width: 600,
+                  buttons: {
+                     "Delete": function(){
+                        sendAjaxRequest("ajax.php", "deleteAirport", $("#deleteAirport_form").serialize(), {'dialog':this, 'popup':popup},function(data, cb_data){
                            console.log(data);
                            if (data["status"] === "ok") {
                               popup.animate({backgroundColor: "rgb(0, 255, 0, 0.3)"},1000);
@@ -348,8 +384,8 @@ unset($airports_r);
                         . '<td>'. $airport['country'] .'</td>'
                         . '<td>'. $airport['displayname'] .'</td>'
                         . '<td style="text-align:center;">'
-                           . '<img src="../img/modify_icon.png" title="">'
-                           . '<img src="../img/delete_icon.png">'
+                           . '<img src="../img/modify_icon.png" class="modifyAirport adminIcon" title="Modify Airport" data-airport-id="'.$airport['id'].'">'
+                           . '<img src="../img/delete_icon.png" class="deleteAirport adminIcon" title="Delete Airport" data-airport-id="'.$airport['id'].'" style="margin-left:25px;">'
                            . '</td>'
                      . '</tr>';
             }
