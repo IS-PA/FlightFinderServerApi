@@ -62,7 +62,12 @@ if (isset($_GET['modifyFlight'])) {
    $stmt->bindValue(':origin', $_POST['origin'], PDO::PARAM_INT);
    $stmt->bindValue(':destination', $_POST['destination'], PDO::PARAM_INT);
    $stmt->bindValue(':departure_timestamp', strtotime(str_replace('/', '-', $_POST['date']).' '.$_POST['time']), PDO::PARAM_INT);
-   $stmt->bindValue(':seats', json_encode(Array('1A' => true)), PDO::PARAM_STR);
+   $stmt->bindValue(':seats', json_encode(Array(
+      '1A' => false, '1B' => false, '1C' => false, '1D' => false,
+      '2A' => false, '2B' => false, '2C' => false, '2D' => false,
+      '3A' => false, '3B' => false, '3C' => false, '3D' => false,
+      '4A' => false, '4B' => false, '4C' => false, '4D' => false
+      )), PDO::PARAM_STR);
    $stmt->execute();
    $flightId = $db->lastInsertId();
    $answer['status'] = 'ok';
