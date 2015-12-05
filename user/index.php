@@ -4,6 +4,23 @@ header('Content-Type: text/html; charset=utf-8');
 date_default_timezone_set('Europe/Madrid');
 require('../api/db.php');
 require('../api/utils.php');
+
+$stmt = $db->prepare("SELECT * FROM flights");
+$stmt->execute();
+$flights = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+$stmt = $db->prepare("SELECT * FROM airports");
+$stmt->execute();
+$airports_r = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$airports = Array();
+$airports_by_country = Array();
+foreach ($airports_r as $airport) {
+   $airports[$airport['id']] = $airport;
+   $airports_by_country[$airport['country']] = $airport;
+}
+unset($airports_r);
+
 session_start();
 
 if (!isset($_SESSION['loggedin']) || empty($_SESSION['loggedin'])) $_SESSION['loggedin'] = false;
@@ -30,25 +47,17 @@ if ($_SESSION['loggedin']) {
    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
    if (count($users) !== 1) {$_SESSION['loggedin'] = false; exit();}
    $user = $users[0];
+   $user['buyedFlights'] = json_decode($user['buyedFlights'], true);
    unset($users);
 }
 
-
-$stmt = $db->prepare("SELECT * FROM flights");
-$stmt->execute();
-$flights = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-
-$stmt = $db->prepare("SELECT * FROM airports");
-$stmt->execute();
-$airports_r = $stmt->fetchAll(PDO::FETCH_ASSOC);
-$airports = Array();
-$airports_by_country = Array();
-foreach ($airports_r as $airport) {
-   $airports[$airport['id']] = $airport;
-   $airports_by_country[$airport['country']] = $airport;
+/*
+foreach ($user['buyedFlights'] as $flightId => $seatsBuyed) {
+   $flight = $flights[$flightId];
 }
-unset($airports_r);
+print_r($flights[2]);
+exit();
+*/
 
 ?><!DOCTYPE html>
 <html>
@@ -171,22 +180,104 @@ unset($airports_r);
                'margin': '5px'
          });
          $('#flights').dataTable({
-            'iDisplayLength': 100,
+            //'iDisplayLength': 100,
             "order": [[ 0, "asc" ]],
-            "aoColumnDefs": [{
+            "aoColumnDefs": [
+               {
                   "bSortable": false,
                   "aTargets": [4, 5]
-               }]
-         }).css({
-            'color' : 'black'
+               },
+               {
+                  "searchable": false,
+                  "targets": [4, 5]
+               }
+            ]
+         });
+         $('#myflights').dataTable({
+            //'iDisplayLength': 100,
+            "order": [[ 0, "asc" ]],
+            "aoColumnDefs": [
+               {
+                  "bSortable": false,
+                  "aTargets": [4, 5]
+               },
+               {
+                  "searchable": false,
+                  "targets": [4, 5]
+               }
+            ]
          });
          $('#airports').dataTable({
-            'iDisplayLength': 100,
+            //'iDisplayLength': 100,
             "order": [[ 0, "asc" ]],
-            "aoColumnDefs": [{
+            "aoColumnDefs": [
+               {
                   "bSortable": false,
                   "aTargets": [3]
-               }]
+               },
+               {
+                  "searchable": false,
+                  "targets": [3]
+               }
+            ]
+         });
+         
+         $(".cancelFlight").click(function(){
+            var currentFlight = this;
+            var currentFlightSeatsBuyed = JSON.parse(currentFlight.dataset.flightSeatsBuyed);
+            var popup = $('<div title="Cancel Flight!">Flight #' + currentFlight.dataset.flightId + '<br>\
+               <form id="cancelFlight_form" method="post"><fieldset>\
+                  <select name="seat" id="cancelFlight_form_select_seat" class="custom-jui-select" required><option disabled selected> -- Select a seat -- </option>\
+                  </select> <label for="cancelFlight_form_select_seat">Seat</label><br>\
+                  <input type="hidden" name="id" value="'+currentFlight.dataset.flightId+'">\
+               </fieldset></form>\
+               <p id="popupMsg">...</p>\
+               </div>');
+            $.each(currentFlightSeatsBuyed, function (i, item) {
+               console.log(item);
+               popup.find("form").find('#cancelFlight_form_select_seat').append($('<option>', {
+                  value: item,
+                  text: item
+               }));
+            });
+            popup.find("form").find('select.custom-jui-select')
+               .css({
+                  'width': '400px'
+               })
+               .selectmenu();
+            popup.dialog({
+               modal: true,
+               width: 600,
+               buttons: {
+                  "Cancel Flight": function(){
+                     sendAjaxRequest("ajax.php", "cancelFlight", $("#cancelFlight_form").serialize(), {'dialog':this, 'popup':popup},function(data, cb_data){
+                        console.log(data);
+                        if (data["status"] === "ok") {
+                           $(cb_data['popup']).animate({backgroundColor: "rgb(0, 255, 0, 0.3)"},1000);
+                           $(cb_data['popup']).find("#popupMsg").text(data["msg"]);
+                           $(cb_data['dialog']).dialog('option', 'hide', 'fold');
+                           window.setTimeout(function() {$(cb_data['dialog']).dialog("close");}, 2000);
+                           window.setTimeout(function() {location.reload();}, 2750);
+                        } else if (data["status"] === "error") {
+                           popup.animate({backgroundColor: "rgb(255, 0, 0, 0.3)"},1000);
+                           $(cb_data['popup']).find("#popupMsg").text(data["msg"]);
+                           window.setTimeout(function() {popup.animate({backgroundColor: "rgba(0, 0, 0, 0)"},1000);}, 2000);
+                        }
+                     });
+                  },
+                  "Don't cancel": function(){
+                     $(this).dialog('option', 'hide', 'fade');
+                     $(this).dialog("close");
+                  }
+               },
+               show: "fold",
+               hide: "scale"
+            });
+         });
+         $(".buyFlight").click(function(){
+            var currentFlight = this;
+            var currentFlightSeats = JSON.parse(currentFlight.dataset.flightSeats);
+            console.log(currentFlightSeats);
          });
       });
       function sendAjaxRequest(url, getData, postData, cb_data, cb) {
@@ -247,7 +338,7 @@ unset($airports_r);
          <ul>
             <li><a href="#tabs-flights">Flights (#<?php echo count($flights)-1; ?>)</a></li>
             <li><a href="#tabs-airports">Airports (#<?php echo count($airports)-1; ?>)</a></li>
-            <li><a href="#tabs-myflights">My Flights</a></li>
+            <li><a href="#tabs-myflights">My Flights (#<?php echo count($user['buyedFlights']); ?>)</a></li>
          </ul>
          <div id="tabs-flights">
             <h3>Flights (#<?php echo count($flights)-1; ?>)</h3> 
@@ -275,17 +366,22 @@ unset($airports_r);
                <tbody>
                   <?php
                   foreach ($flights as $flight) {
+                     $availableSeats = 0;
+                     $flight['seats'] = json_decode($flight['seats'], true);
+                     foreach ($flight['seats'] as $seat) {
+                        if (!$seat) $availableSeats++;
+                     }
                      if ($flight['id'] == 0) continue;
                      echo '<tr>'
                               . '<td><p>'. $flight['id'] ."</p></td>\n"
                               . '<td><p class="infolink" data-tooltip="[Id: '.$flight['origin']."]<br/>". getAirportNameById($flight['origin'], $airports) ."\n(".getAirportCountryById($flight['origin'], $airports).')">'.getAirportNameById($flight['origin'], $airports).'</p></td>'
                               . '<td><p class="infolink" data-tooltip="[Id: '.$flight['destination']."]<br/>". getAirportNameById($flight['destination'], $airports) ."\n(".getAirportCountryById($flight['destination'], $airports).')">'.getAirportNameById($flight['destination'], $airports).'</p></td>'
                               . '<td>'. date("d/m/Y\<br> H:i", $flight['departure_timestamp']) ."</td>\n"
-                              . '<td>'. $flight['seats'] ."</td>\n"
-                              . '<td style="text-align:center;">'
-                                 . '<img src="../img/buy_icon.png" class="buyFlight adminIcon" title="Buy flight" data-flight-id="'.$flight['id'].'" data-flight-origin='.$flight['origin'].' data-flight-destination='.$flight['destination'].' data-flight-date="'.date("d/m/Y", $flight['departure_timestamp']).'" data-flight-time="'.date("H:i", $flight['departure_timestamp']).'">'
-                                 . '<img src="../img/cancel_icon.png" style="margin-left:25px;" class="cancelFlight adminIcon" title="Cancel flight" data-flight-id="'.$flight['id'].'" data-flight-origin='.$flight['origin'].' data-flight-destination='.$flight['destination'].' data-flight-date="'.date("d/m/Y", $flight['departure_timestamp']).'" data-flight-time="'.date("H:i", $flight['departure_timestamp']).'">'
-                                 . "</td>\n"
+                              . '<td>'. $availableSeats .' / '.count($flight['seats'])."</td>\n"
+                              . '<td style="text-align:center;">';
+                                 echo '<img src="../img/buy_icon.png" class="buyFlight adminIcon" title="Buy flight" data-flight-id="'.$flight['id'].'" data-flight-origin='.$flight['origin'].' data-flight-destination='.$flight['destination'].' data-flight-date="'.date("d/m/Y", $flight['departure_timestamp']).'" data-flight-time="'.date("H:i", $flight['departure_timestamp']).'" style="margin-right: 25px" data-flight-seats="'.htmlspecialchars(json_encode($flight['seats'])).'">';
+                                 if (isset($user['buyedFlights'][$flight['id']])) echo '<img src="../img/cancel_icon.png" class="cancelFlight adminIcon" title="Cancel flight" data-flight-id="'.$flight['id'].'" data-flight-origin='.$flight['origin'].' data-flight-destination='.$flight['destination'].' data-flight-date="'.date("d/m/Y", $flight['departure_timestamp']).'" data-flight-time="'.date("H:i", $flight['departure_timestamp']).'" data-flight-seats-buyed="'.htmlspecialchars(json_encode($user['buyedFlights'][$flight['id']])).'">';
+                                 echo "</td>\n"
                            . '</tr>'."\n\n";
                   }
                   ?>
@@ -320,25 +416,57 @@ unset($airports_r);
                               . '<td>'. $airport['country'] ."</td>\n"
                               . '<td>'. $airport['displayname'] ."</td>\n"
                               . '<td style="text-align:center;">'
-                                 . '<img src="../img/modify_icon.png" class="modifyAirport adminIcon" title="Modify Airport" data-airport-id="'.$airport['id'].'" data-airport-country="'.$airport['country'].'" data-airport-displayname="'.$airport['displayname'].'">'
-                                 . '<img src="../img/delete_icon.png" class="deleteAirport adminIcon" title="Delete Airport" data-airport-id="'.$airport['id'].'" style="margin-left:25px;">'
                                  . "</td>\n"
                            . "</tr>\n\n";
                   }
                   ?>
                </tbody>
             </table>
-            
-            
-            
-            
-            
-            
          </div>
          <div id="tabs-myflights">
-            <p>My Flights</p>
-            <br>
-            Not done yet....
+            <h3>My Flights (#<?php echo count($user['buyedFlights']); ?>)</h3> 
+            <table id="myflights" class="display" cellspacing="0" width="100%">
+               <thead>
+                  <tr>
+                     <th>ID</th>
+                     <th>Origin</th>
+                     <th>Destination</th>
+                     <th>Departure</th>
+                     <th>Seats</th>
+                     <th>Actions</th>
+                  </tr>
+               </thead>
+               <tfoot>
+                  <tr>
+                     <th>ID</th>
+                     <th>Origin</th>
+                     <th>Destination</th>
+                     <th>Departure</th>
+                     <th>Seats</th>
+                     <th>Actions</th>
+                  </tr>
+               </tfoot>
+               <tbody>
+                  <?php
+                  foreach ($user['buyedFlights'] as $flightId => $seatsBuyed) {
+                     $flight = $flights[$flightId];
+                     $flight['seats'] = json_decode($flight['seats'], true);
+                     if ($flight['id'] == 0) continue;
+                     echo '<tr>'
+                              . '<td><p>'. $flight['id'] ."</p></td>\n"
+                              . '<td><p class="infolink" data-tooltip="[Id: '.$flight['origin']."]<br/>". getAirportNameById($flight['origin'], $airports) ."\n(".getAirportCountryById($flight['origin'], $airports).')">'.getAirportNameById($flight['origin'], $airports).'</p></td>'
+                              . '<td><p class="infolink" data-tooltip="[Id: '.$flight['destination']."]<br/>". getAirportNameById($flight['destination'], $airports) ."\n(".getAirportCountryById($flight['destination'], $airports).')">'.getAirportNameById($flight['destination'], $airports).'</p></td>'
+                              . '<td>'. date("d/m/Y\<br> H:i", $flight['departure_timestamp']) ."</td>\n"
+                              . '<td>'. implode(', ', $seatsBuyed) .' (#'.count($seatsBuyed).")</td>\n"
+                              . '<td style="text-align:center;">';
+                                 echo '<img src="../img/buy_icon.png" class="buyFlight adminIcon" title="Buy flight" data-flight-id="'.$flight['id'].'" data-flight-origin='.$flight['origin'].' data-flight-destination='.$flight['destination'].' data-flight-date="'.date("d/m/Y", $flight['departure_timestamp']).'" data-flight-time="'.date("H:i", $flight['departure_timestamp']).'" style="margin-right: 25px" data-flight-seats="'.htmlspecialchars(json_encode($flight['seats'])).'">';
+                                 if (isset($user['buyedFlights'][$flight['id']])) echo '<img src="../img/cancel_icon.png" class="cancelFlight adminIcon" title="Cancel flight" data-flight-id="'.$flight['id'].'" data-flight-origin='.$flight['origin'].' data-flight-destination='.$flight['destination'].' data-flight-date="'.date("d/m/Y", $flight['departure_timestamp']).'" data-flight-time="'.date("H:i", $flight['departure_timestamp']).'" data-flight-seats-buyed="'.htmlspecialchars(json_encode($seatsBuyed)).'">';
+                                 echo "</td>\n"
+                           . '</tr>'."\n\n";
+                  }
+                  ?>
+               </tbody>
+            </table>
          </div>
       </div>
       
