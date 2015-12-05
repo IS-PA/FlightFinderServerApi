@@ -1,5 +1,6 @@
 <?php
 ini_set('display_errors','1'); error_reporting(E_ALL);
+header('Content-Type: text/html; charset=utf-8');
 date_default_timezone_set('Europe/Madrid');
 require('../api/db.php');
 require('../api/utils.php');
@@ -26,7 +27,6 @@ unset($airports_r);
    <head>
       <title>Admin Panel: Flight Finder</title>
       <meta charset="UTF-8">
-      <!--<meta name="viewport" content="width=device-width, initial-scale=1.0">-->
       <link rel="stylesheet" href="https://cdn.datatables.net/1.10.10/css/dataTables.jqueryui.min.css">
       <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
       <script src="//files.devpgsv.com/libs/jquery-ui-1.11.4.custom-BlackTie/jquery-ui.min.js"></script>
@@ -34,7 +34,6 @@ unset($airports_r);
       <script src="../js/datepicker-es.js"></script>
       <script src="https://cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
       <script src="https://cdn.datatables.net/1.10.10/js/dataTables.jqueryui.min.js"></script>
-      
       
       <style>
          .adminIcon {
