@@ -462,13 +462,18 @@ unset($airports_r);
          <tbody>
             <?php
             foreach ($flights as $flight) {
+               $availableSeats = 0;
+               $flight['seats'] = json_decode($flight['seats'], true);
+               foreach ($flight['seats'] as $seat) {
+                  if (!$seat) $availableSeats++;
+               }
                if ($flight['id'] == 0) continue;
                echo '<tr>'
                         . '<td><a name="flight-'. $flight['id'] .'"></a>'. $flight['id'] ."</td>\n"
                         . '<td><a class="infolink" href="#airport-'.$flight['origin'].'">['.$flight['origin'].']'. getAirportNameById($flight['origin'], $airports) .' ('.getAirportCountryById($flight['origin'], $airports).")</a></td>\n"
                         . '<td><a class="infolink" href="#airport-'.$flight['destination'].'">['.$flight['destination'].']'. getAirportNameById($flight['destination'], $airports) .' ('.getAirportCountryById($flight['destination'], $airports).")</a></td>\n"
                         . '<td>'. date("d/m/Y\<br> H:i", $flight['departure_timestamp']) ."</td>\n"
-                        . '<td>'. $flight['seats'] ."</td>\n"
+                        . '<td>'. $availableSeats .' / '.count($flight['seats'])."</td>\n"
                         . '<td style="text-align:center;">'
                            . '<img src="../img/modify_icon.png" class="modifyFlight adminIcon" title="Modify flight" data-flight-id="'.$flight['id'].'" data-flight-origin='.$flight['origin'].' data-flight-destination='.$flight['destination'].' data-flight-date="'.date("d/m/Y", $flight['departure_timestamp']).'" data-flight-time="'.date("H:i", $flight['departure_timestamp']).'">'
                            . '<img src="../img/delete_icon.png" class="deleteFlight adminIcon" title="Delete flight" data-flight-id="'.$flight['id'].'" style="margin-left:25px;">'
