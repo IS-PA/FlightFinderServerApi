@@ -17,3 +17,28 @@ function getAirportCountryById($id, $airports) {
    }
    return "???";
 }
+
+
+
+function checkParams($origin, $check) {
+   $missingParams = Array();
+   foreach ($check as $param) {
+      if (!isset($origin[$param]) || empty($origin[$param])) {
+         $missingParams[] = $param;
+      }
+   }
+   if (count($missingParams) != 0) return "Missing params: ".implode(', ', $missingParams);
+   
+   if (in_array("date", $check)) {
+      if (!preg_match('/^[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/', $origin['date'])) {
+         return 'Date should be DD/MM/YYYY';
+      }
+   }
+   
+   if (in_array("time", $check)) {
+      if (!preg_match("/^[0-9]{2}:[0-9]{2}$/", $origin['time'])) {
+         return 'Time should be HH:mm';
+      }
+   }
+   return true;
+}
