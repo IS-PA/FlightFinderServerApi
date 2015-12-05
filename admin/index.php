@@ -27,10 +27,10 @@ unset($airports_r);
       <title>Admin Panel: Flight Finder</title>
       <meta charset="UTF-8">
       <!--<meta name="viewport" content="width=device-width, initial-scale=1.0">-->
-      <link rel="stylesheet" href="//code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css">
       <link rel="stylesheet" href="https://cdn.datatables.net/1.10.10/css/dataTables.jqueryui.min.css">
       <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-      <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+      <script src="//files.devpgsv.com/libs/jquery-ui-1.11.4.custom-BlackTie/jquery-ui.min.js"></script>
+      <link rel="stylesheet" href="//files.devpgsv.com/libs/jquery-ui-1.11.4.custom-BlackTie/jquery-ui.css">
       <script src="../js/datepicker-es.js"></script>
       <script src="https://cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
       <script src="https://cdn.datatables.net/1.10.10/js/dataTables.jqueryui.min.js"></script>
@@ -76,7 +76,7 @@ unset($airports_r);
                .button()
                .css({
                   'font' : 'inherit',
-                  'color' : 'inherit',
+                  'color' : '#eeeeee',
                   'text-align' : 'left',
                   'outline' : 'none',
                   'cursor' : 'text',
@@ -124,7 +124,7 @@ unset($airports_r);
                   .button()
                   .css({
                      'font' : 'inherit',
-                     'color' : 'inherit',
+                     'color' : '#eeeeee',
                      'text-align' : 'left',
                      'outline' : 'none',
                      'cursor' : 'text',
@@ -152,7 +152,7 @@ unset($airports_r);
                            } else if (data["status"] === "error") {
                               popup.animate({backgroundColor: "rgb(255, 0, 0, 0.3)"},1000);
                               $(cb_data['popup']).find("#popupMsg").text(data["msg"]);
-                              window.setTimeout(function() {popup.animate({backgroundColor: "#ffffff"},1000);}, 2000);
+                              window.setTimeout(function() {popup.animate({backgroundColor: "rgba(0, 0, 0, 0)"},1000);}, 2000);
                            }
                         });
                      },
@@ -178,7 +178,7 @@ unset($airports_r);
                   .button()
                   .css({
                      'font' : 'inherit',
-                     'color' : 'inherit',
+                     'color' : '#eeeeee',
                      'text-align' : 'left',
                      'outline' : 'none',
                      'cursor' : 'text',
@@ -205,7 +205,7 @@ unset($airports_r);
                            } else if (data["status"] === "error") {
                               popup.animate({backgroundColor: "rgb(255, 0, 0, 0.3)"},1000);
                               $(cb_data['popup']).find("#popupMsg").text(data["msg"]);
-                              window.setTimeout(function() {popup.animate({backgroundColor: "#ffffff"},1000);}, 2000);
+                              window.setTimeout(function() {popup.animate({backgroundColor: "rgba(0, 0, 0, 0)"},1000);}, 2000);
                            }
                         });
                      },
@@ -247,7 +247,7 @@ unset($airports_r);
                   .button()
                   .css({
                      'font' : 'inherit',
-                     'color' : 'inherit',
+                     'color' : '#eeeeee',
                      'text-align' : 'left',
                      'outline' : 'none',
                      'cursor' : 'text',
@@ -277,7 +277,7 @@ unset($airports_r);
                            } else if (data["status"] === "error") {
                               popup.animate({backgroundColor: "rgb(255, 0, 0, 0.3)"},1000);
                               $(cb_data['popup']).find("#popupMsg").text(data["msg"]);
-                              window.setTimeout(function() {popup.animate({backgroundColor: "#ffffff"},1000);}, 2000);
+                              window.setTimeout(function() {popup.animate({backgroundColor: "rgba(0, 0, 0, 0)"},1000);}, 2000);
                            }
                         });
                      },
@@ -305,7 +305,7 @@ unset($airports_r);
                   .button()
                   .css({
                      'font' : 'inherit',
-                     'color' : 'inherit',
+                     'color' : '#eeeeee',
                      'text-align' : 'left',
                      'outline' : 'none',
                      'cursor' : 'text',
@@ -332,7 +332,7 @@ unset($airports_r);
                            } else if (data["status"] === "error") {
                               popup.animate({backgroundColor: "rgb(255, 0, 0, 0.3)"},1000);
                               $(cb_data['popup']).find("#popupMsg").text(data["msg"]);
-                              window.setTimeout(function() {popup.animate({backgroundColor: "#ffffff"},1000);}, 2000);
+                              window.setTimeout(function() {popup.animate({backgroundColor: "rgba(0, 0, 0, 0)"},1000);}, 2000);
                            }
                         });
                      },
@@ -368,7 +368,7 @@ unset($airports_r);
                            } else if (data["status"] === "error") {
                               popup.animate({backgroundColor: "rgb(255, 0, 0, 0.3)"},1000);
                               $(cb_data['popup']).find("#popupMsg").text(data["msg"]);
-                              window.setTimeout(function() {popup.animate({backgroundColor: "#ffffff"},1000);}, 2000);
+                              window.setTimeout(function() {popup.animate({backgroundColor: "rgba(0, 0, 0, 0)"},1000);}, 2000);
                            }
                         });
                      },
@@ -404,7 +404,7 @@ unset($airports_r);
                            } else if (data["status"] === "error") {
                               popup.animate({backgroundColor: "rgb(255, 0, 0, 0.3)"},1000);
                               $(cb_data['popup']).find("#popupMsg").text(data["msg"]);
-                              window.setTimeout(function() {popup.animate({backgroundColor: "#ffffff"},1000);}, 2000);
+                              window.setTimeout(function() {popup.animate({backgroundColor: "rgba(0, 0, 0, 0)"},1000);}, 2000);
                            }
                         });
                      },
