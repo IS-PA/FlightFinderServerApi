@@ -80,6 +80,20 @@ if (isset($_GET['cancelFlight'])) {
    $answer['msg'] = 'Canceled!';
    echo json_encode($answer);
    exit();
+} else if (isset($_GET['buyFlight'])) {
+   
+   if (($errorMsg = checkParams($_POST, Array('id', 'seat'))) !== true) {
+      $answer['status'] = 'error';
+      $answer['msg'] = $errorMsg;
+      echo json_encode($answer);
+      exit();
+   }
+   
+   
+   $answer['status'] = 'error';
+   $answer['msg'] = 'I\'m working on this!!!';
+   echo json_encode($answer);
+   exit();
 }
 
 
