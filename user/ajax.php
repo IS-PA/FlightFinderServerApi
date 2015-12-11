@@ -7,8 +7,12 @@ require('../api/utils.php');
 
 $stmt = $db->prepare("SELECT * FROM flights");
 $stmt->execute();
-$flights = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+$flights_r = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$flights = Array();
+foreach ($flights_r as $flight) {
+   $flight['seats'] = json_decode($flight['seats'], true);
+   $flights[$flight['id']] = $flight;
+}
 
 $stmt = $db->prepare("SELECT * FROM airports");
 $stmt->execute();
@@ -60,9 +64,18 @@ if (isset($_GET['cancelFlight'])) {
       unset($user['buyedFlights'][$_POST['id']]);
    }
    $stmt = $db->prepare("UPDATE users SET buyedFlights=:buyedFlights WHERE id=:id");
-   $stmt->bindValue(':buyedFlights', json_encode($user['buyedFlights']), PDO::PARAM_INT);
+   $stmt->bindValue(':buyedFlights', json_encode($user['buyedFlights']), PDO::PARAM_STR);
    $stmt->bindValue(':id', $user['id'], PDO::PARAM_INT);
    $stmt->execute();
+   
+   $flights[$_POST['id']]['seats'][$_POST['seat']] = false;
+   $stmt = $db->prepare("UPDATE flights SET seats=:seats WHERE id=:id");
+   $stmt->bindValue(':seats', json_encode($flights[$_POST['id']]['seats']), PDO::PARAM_STR);
+   $stmt->bindValue(':id', $_POST['id'], PDO::PARAM_INT);
+   $stmt->execute();
+   
+   
+   
    $answer['status'] = 'ok';
    $answer['msg'] = 'Canceled!';
    echo json_encode($answer);
