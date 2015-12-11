@@ -39,7 +39,15 @@ if (isset($_GET['login']) && isset($_POST['username']) && !empty($_POST['usernam
       }
    }
 }
-if (isset($_GET['logout'])) $_SESSION['loggedin'] = false;
+if (isset($_GET['logout'])) {
+   $_SESSION['loggedin'] = false;
+}
+
+if (isset($_GET['logout']) || isset($_GET['login'])) {
+   header('Location: '.$_SERVER['PHP_SELF']);
+   echo 'Redirecting to -> '.$_SERVER['PHP_SELF'];
+   exit();
+}
 
 if ($_SESSION['loggedin']) {
    if (!isset($_SESSION['userid']) || empty($_SESSION['userid'])) {$_SESSION['loggedin'] = false; exit();}
@@ -52,6 +60,7 @@ if ($_SESSION['loggedin']) {
    $user['buyedFlights'] = json_decode($user['buyedFlights'], true);
    unset($users);
 }
+
 
 /*
 foreach ($user['buyedFlights'] as $flightId => $seatsBuyed) {
@@ -92,15 +101,15 @@ exit();
          width: 350px;
          text-align: center;
          border-radius: 20px;
-         background-color: rgba(255, 255, 255, 0.4);
+         background-color: rgba(255, 47, 47, 0.3);
          padding:20px 40px 20px 40px;
          -webkit-transition: background-color 1s, border-radius 1s;
          transition: background-color 1s, border-radius 1s;
       }
 
       #loginbox:hover {
-         background-color: rgba(255, 255, 255, 0.7);
-         border-radius: 40px;
+         background-color: rgba(0, 187, 255, 0.8);
+         border-radius: 50px;
       }
       
       #topBar {
@@ -237,11 +246,28 @@ exit();
                <p id="popupMsg">...</p>\
                </div>');
             $.each(currentFlightSeats, function (i, item) {
-               popup.find("form").find('#buyFlight_form_select_seat').append($('<option>', {
-                  value: i,
-                  text: i,
-                  disabled: item !== false
-               }));
+               if (item !== false) {
+                  if (item === <?php echo (isset($user) ? $user['id'] : "-1"); ?>) {
+                     popup.find("form").find('#buyFlight_form_select_seat').append($('<option>', {
+                        value: i,
+                        text: i + " (I think I have bought this one!)",
+                        disabled: true
+                     }));
+                  } else {
+                     popup.find("form").find('#buyFlight_form_select_seat').append($('<option>', {
+                        value: i,
+                        text: i,
+                        disabled: true
+                     }));
+                  }
+                  
+               } else {
+                  popup.find("form").find('#buyFlight_form_select_seat').append($('<option>', {
+                     value: i,
+                     text: i
+                  }));
+               }
+               
             });
             popup.find("form").find('select.custom-jui-select')
                .css({
