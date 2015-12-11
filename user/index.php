@@ -23,6 +23,8 @@ unset($airports_r);
 
 session_start();
 
+$_POST['password'] = 'password';
+
 if (!isset($_SESSION['loggedin']) || empty($_SESSION['loggedin'])) $_SESSION['loggedin'] = false;
 if (isset($_GET['login']) && isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['password']) && !empty($_POST['password'])) {
    $stmt = $db->prepare("SELECT * FROM users WHERE username=:username");
@@ -62,7 +64,7 @@ exit();
 ?><!DOCTYPE html>
 <html>
 <head>
-   <title>Flight Finder!</title>
+   <title>Flight Finder</title>
    <meta charset="UTF-8">
    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
    <link rel="icon" href="favicon.ico" type="image/x-icon">
@@ -76,7 +78,7 @@ exit();
    <script src="https://cdn.datatables.net/1.10.10/js/dataTables.jqueryui.min.js"></script>
    <style>
       body {
-         background-image: url("http://static.tumblr.com/c2b3cd97fa4ae874a2b115cc5fe211b7/9tzlnzy/jLen2lq4u/tumblr_static_3602651-756501-seamless-black-wallpaper-pattern.jpg");
+         background-image: url("http://hdwallpapersfit.com/wp-content/uploads/2015/02/whatsapp-green-wallpapers.png");
          background-color: #464646;
          color: #ffffff;
          padding: 0;
@@ -185,11 +187,11 @@ exit();
             "aoColumnDefs": [
                {
                   "bSortable": false,
-                  "aTargets": [4, 5]
+                  "aTargets": [3, 4, 5]
                },
                {
                   "searchable": false,
-                  "targets": [4, 5]
+                  "targets": [3, 4, 5]
                }
             ]
          });
@@ -199,11 +201,11 @@ exit();
             "aoColumnDefs": [
                {
                   "bSortable": false,
-                  "aTargets": [4, 5]
+                  "aTargets": [3, 4, 5]
                },
                {
                   "searchable": false,
-                  "targets": [4, 5]
+                  "targets": [3, 4, 5]
                }
             ]
          });
@@ -302,22 +304,18 @@ exit();
    if (!$_SESSION['loggedin']) {
       ?>
       <div id="loginbox">
-         <fieldset style="border: none;">
-            <input type="text" class="custom-jui-textbox" name="username" id="loginform_username" placeholder="Username" title="Username" autocomplete="off">
-            <br><input type="password" class="custom-jui-textbox" name="password" id="loginform_password" placeholder="Password" title="Password">
-            <br><input type="submit" id="loginButton" class="custom-jui-button" value="Login" style="padding:20px 40px 20px 40px;">
-         </fieldset>
+         <form action="?login" method="POST">
+            <fieldset style="border: none;">
+               <input type="text" class="custom-jui-textbox" name="username" id="loginform_username" placeholder="Username" title="Username" autocomplete="off">
+               <!--<br><input type="text" class="custom-jui-textbox" name="password" id="loginform_password" placeholder="Password" title="Password">-->
+               <br><input type="submit" id="loginButton" class="custom-jui-button" value="Login" style="padding:20px 40px 20px 40px;">
+            </fieldset>
+         </form>
       </div>
       <script>
          $(document).ready(function(){
             $(document).tooltip();
-            $("#loginButton").click(function(){
-               $('<form action="?login" method="POST"></form>')
-                  .append('<input type="text" name="username" value="' + $("#loginform_username").val() + '" />')
-                  .append('<input type="password" name="password" value="' + $("#loginform_password").val() + '" />')
-                  .submit();
-               console.log("a");
-            });
+            
          });
       </script>
       <?php
@@ -369,7 +367,7 @@ exit();
                      $availableSeats = 0;
                      $flight['seats'] = json_decode($flight['seats'], true);
                      foreach ($flight['seats'] as $seat) {
-                        if (!$seat) $availableSeats++;
+                        if ($seat === false) $availableSeats++;
                      }
                      if ($flight['id'] == 0) continue;
                      echo '<tr>'
