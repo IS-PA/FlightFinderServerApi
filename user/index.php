@@ -224,6 +224,63 @@ exit();
             ]
          });
          
+         $(".buyFlight").click(function(){
+            var currentFlight = this;
+            var currentFlightSeats = JSON.parse(currentFlight.dataset.flightSeats);
+            var popup = $('<div title="Buying Flight!">Flight #' + currentFlight.dataset.flightId + '\
+               <input readonly="readonly" value="' + currentFlight.dataset.flightOriginName + ' -> ' + currentFlight.dataset.flightDestinationName + '" class="custom-jui-textbox"><br>\
+               <form id="buyFlight_form" method="post"><fieldset>\
+                  <select name="seat" id="buyFlight_form_select_seat" class="custom-jui-select" required><option disabled selected> -- Select a seat -- </option>\
+                  </select> <label for="buyFlight_form_select_seat">Seat</label><br>\
+                  <input type="hidden" name="id" value="'+currentFlight.dataset.flightId+'">\
+               </fieldset></form>\
+               <p id="popupMsg">...</p>\
+               </div>');
+            $.each(currentFlightSeats, function (i, item) {
+               popup.find("form").find('#buyFlight_form_select_seat').append($('<option>', {
+                  value: i,
+                  text: i,
+                  disabled: item !== false
+               }));
+            });
+            popup.find("form").find('select.custom-jui-select')
+               .css({
+                  'width': '400px'
+               })
+               .selectmenu();
+            popup.find('.custom-jui-textbox')
+               .button()
+               .css({
+                  'font' : 'inherit',
+                  'color' : '#eeeeee',
+                  'text-align' : 'left',
+                  'outline' : 'none',
+                  'cursor' : 'text',
+                  'margin': '5px'
+            });
+            popup.dialog({
+               modal: true,
+               width: 600,
+               closeOnEscape: true,
+               buttons: {
+                  "Buy": function() {
+                     if (executePayment()) {
+                        alert("You paid :)");
+                     } else {
+                        alert("You haven't paid.... ");
+                     }
+                  },
+                  "Cancel": function(){
+                     $(this).dialog('option', 'hide', 'fade');
+                     $(this).dialog("close");
+                  }
+               },
+               show: "fold",
+               hide: "scale"
+            });
+         });
+         
+         
          $(".cancelFlight").click(function(){
             var currentFlight = this;
             var currentFlightSeatsBuyed = JSON.parse(currentFlight.dataset.flightSeatsBuyed);
@@ -250,6 +307,7 @@ exit();
             popup.dialog({
                modal: true,
                width: 600,
+               closeOnEscape: true,
                buttons: {
                   "Cancel Flight": function(){
                      sendAjaxRequest("ajax.php", "cancelFlight", $("#cancelFlight_form").serialize(), {'dialog':this, 'popup':popup},function(data, cb_data){
@@ -276,12 +334,12 @@ exit();
                hide: "scale"
             });
          });
-         $(".buyFlight").click(function(){
-            var currentFlight = this;
-            var currentFlightSeats = JSON.parse(currentFlight.dataset.flightSeats);
-            console.log(currentFlightSeats);
-         });
       });
+      
+      function executePayment(cb_data, cb) {
+        return confirm("Pay?");
+      }
+      
       function sendAjaxRequest(url, getData, postData, cb_data, cb) {
          $.ajax({
             type: "POST",
@@ -377,7 +435,7 @@ exit();
                               . '<td>'. date("d/m/Y\<br> H:i", $flight['departure_timestamp']) ."</td>\n"
                               . '<td>'. $availableSeats .' / '.count($flight['seats'])."</td>\n"
                               . '<td style="text-align:center;">';
-                                 echo '<img src="../img/buy_icon.png" class="buyFlight adminIcon" title="Buy flight" data-flight-id="'.$flight['id'].'" data-flight-origin='.$flight['origin'].' data-flight-destination='.$flight['destination'].' data-flight-date="'.date("d/m/Y", $flight['departure_timestamp']).'" data-flight-time="'.date("H:i", $flight['departure_timestamp']).'" style="margin-right: 25px" data-flight-seats="'.htmlspecialchars(json_encode($flight['seats'])).'">';
+                                 echo '<img src="../img/buy_icon.png" class="buyFlight adminIcon" title="Buy flight" data-flight-id="'.$flight['id'].'" data-flight-origin-name='.getAirportNameById($flight['origin'], $airports).' data-flight-destination-name='.getAirportNameById($flight['destination'], $airports).' data-flight-date="'.date("d/m/Y", $flight['departure_timestamp']).'" data-flight-time="'.date("H:i", $flight['departure_timestamp']).'" style="margin-right: 25px" data-flight-seats="'.htmlspecialchars(json_encode($flight['seats'])).'">';
                                  if (isset($user['buyedFlights'][$flight['id']])) echo '<img src="../img/cancel_icon.png" class="cancelFlight adminIcon" title="Cancel flight" data-flight-id="'.$flight['id'].'" data-flight-origin='.$flight['origin'].' data-flight-destination='.$flight['destination'].' data-flight-date="'.date("d/m/Y", $flight['departure_timestamp']).'" data-flight-time="'.date("H:i", $flight['departure_timestamp']).'" data-flight-seats-buyed="'.htmlspecialchars(json_encode($user['buyedFlights'][$flight['id']])).'">';
                                  echo "</td>\n"
                            . '</tr>'."\n\n";
