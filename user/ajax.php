@@ -88,10 +88,36 @@ if (isset($_GET['cancelFlight'])) {
       echo json_encode($answer);
       exit();
    }
+   if (!isset($flights[$_POST['id']]['seats'][$_POST['seat']])) {
+      $answer['status'] = 'error';
+      $answer['msg'] = 'Does that seat exists?';
+      echo json_encode($answer);
+      exit();
+   }
+   if ($flights[$_POST['id']]['seats'][$_POST['seat']] !== false) {
+      $answer['status'] = 'error';
+      $answer['msg'] = 'This seat has already been bought';
+      echo json_encode($answer);
+      exit();
+   }
+   
+   if (!isset($user['buyedFlights'][$_POST['id']])) $user['buyedFlights'][$_POST['id']] = Array();
+   array_push($user['buyedFlights'][$_POST['id']], $_POST['seat']);
+   $stmt = $db->prepare("UPDATE users SET buyedFlights=:buyedFlights WHERE id=:id");
+   $stmt->bindValue(':buyedFlights', json_encode($user['buyedFlights']), PDO::PARAM_STR);
+   $stmt->bindValue(':id', $user['id'], PDO::PARAM_INT);
+   $stmt->execute();
    
    
-   $answer['status'] = 'error';
-   $answer['msg'] = 'I\'m working on this!!!';
+   $flights[$_POST['id']]['seats'][$_POST['seat']] = (int)$user['id'];
+   $stmt = $db->prepare("UPDATE flights SET seats=:seats WHERE id=:id");
+   $stmt->bindValue(':seats', json_encode($flights[$_POST['id']]['seats']), PDO::PARAM_STR);
+   $stmt->bindValue(':id', $_POST['id'], PDO::PARAM_INT);
+   $stmt->execute();
+   
+   
+   $answer['status'] = 'ok';
+   $answer['msg'] = 'Bought!';
    echo json_encode($answer);
    exit();
 }

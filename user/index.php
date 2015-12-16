@@ -247,6 +247,7 @@ exit();
                </div>');
             $.each(currentFlightSeats, function (i, item) {
                if (item !== false) {
+                  console.log(item, <?php echo (isset($user) ? $user['id'] : "-1"); ?>);
                   if (item === <?php echo (isset($user) ? $user['id'] : "-1"); ?>) {
                      popup.find("form").find('#buyFlight_form_select_seat').append($('<option>', {
                         value: i,
@@ -291,9 +292,25 @@ exit();
                buttons: {
                   "Buy": function() {
                      if (executePayment()) {
-                        alert("You paid :)");
+                        console.log("You paid :)");
+                        sendAjaxRequest("ajax.php", "buyFlight", $("#buyFlight_form").serialize(), {'dialog':this, 'popup':popup},function(data, cb_data){
+                           console.log(data);
+                           if (data["status"] === "ok") {
+                              $(cb_data['popup']).animate({backgroundColor: "rgb(0, 255, 0, 0.3)"},1000);
+                              $(cb_data['popup']).find("#popupMsg").text(data["msg"]);
+                              $(cb_data['dialog']).dialog('option', 'hide', 'fold');
+                              window.setTimeout(function() {$(cb_data['dialog']).dialog("close");}, 2000);
+                              window.setTimeout(function() {location.reload();}, 2750);
+                           } else if (data["status"] === "error") {
+                              $(cb_data['popup']).animate({backgroundColor: "rgb(255, 0, 0, 0.3)"},1000);
+                              $(cb_data['popup']).find("#popupMsg").text(data["msg"]);
+                              window.setTimeout(function() {popup.animate({backgroundColor: "rgba(0, 0, 0, 0)"},1000);}, 2000);
+                           }
+                        });
                      } else {
-                        alert("You haven't paid.... ");
+                        popup.animate({backgroundColor: "rgb(255, 0, 0, 0.3)"},1000);
+                        $(popup).find("#popupMsg").text("You have to pay if you want to buy this.... ");
+                        window.setTimeout(function() {popup.animate({backgroundColor: "rgba(0, 0, 0, 0)"},1000);}, 2000);
                      }
                   },
                   "Cancel": function(){
@@ -345,7 +362,7 @@ exit();
                            window.setTimeout(function() {$(cb_data['dialog']).dialog("close");}, 2000);
                            window.setTimeout(function() {location.reload();}, 2750);
                         } else if (data["status"] === "error") {
-                           popup.animate({backgroundColor: "rgb(255, 0, 0, 0.3)"},1000);
+                           $(cb_data['popup']).animate({backgroundColor: "rgb(255, 0, 0, 0.3)"},1000);
                            $(cb_data['popup']).find("#popupMsg").text(data["msg"]);
                            window.setTimeout(function() {popup.animate({backgroundColor: "rgba(0, 0, 0, 0)"},1000);}, 2000);
                         }
@@ -541,7 +558,7 @@ exit();
                               . '<td>'. date("d/m/Y\<br> H:i", $flight['departure_timestamp']) ."</td>\n"
                               . '<td>'. implode(', ', $seatsBuyed) .' (#'.count($seatsBuyed).")</td>\n"
                               . '<td style="text-align:center;">';
-                                 echo '<img src="../img/buy_icon.png" class="buyFlight adminIcon" title="Buy flight" data-flight-id="'.$flight['id'].'" data-flight-origin='.$flight['origin'].' data-flight-destination='.$flight['destination'].' data-flight-date="'.date("d/m/Y", $flight['departure_timestamp']).'" data-flight-time="'.date("H:i", $flight['departure_timestamp']).'" style="margin-right: 25px" data-flight-seats="'.htmlspecialchars(json_encode($flight['seats'])).'">';
+                                 echo '<img src="../img/buy_icon.png" class="buyFlight adminIcon" title="Buy flight" data-flight-id="'.$flight['id'].'" data-flight-origin='.$flight['origin'].' data-flight-destination='.$flight['destination'].' data-flight-origin-name='.getAirportNameById($flight['origin'], $airports).' data-flight-destination-name='.getAirportNameById($flight['destination'], $airports).' data-flight-date="'.date("d/m/Y", $flight['departure_timestamp']).'" data-flight-time="'.date("H:i", $flight['departure_timestamp']).'" style="margin-right: 25px" data-flight-seats="'.htmlspecialchars(json_encode($flight['seats'])).'">';
                                  if (isset($user['buyedFlights'][$flight['id']])) echo '<img src="../img/cancel_icon.png" class="cancelFlight adminIcon" title="Cancel flight" data-flight-id="'.$flight['id'].'" data-flight-origin='.$flight['origin'].' data-flight-destination='.$flight['destination'].' data-flight-date="'.date("d/m/Y", $flight['departure_timestamp']).'" data-flight-time="'.date("H:i", $flight['departure_timestamp']).'" data-flight-seats-buyed="'.htmlspecialchars(json_encode($seatsBuyed)).'">';
                                  echo "</td>\n"
                            . '</tr>'."\n\n";
