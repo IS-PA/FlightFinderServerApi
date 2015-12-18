@@ -23,7 +23,7 @@ function getAirportCountryById($id, $airports) {
 function checkParams($origin, $check) {
    $missingParams = Array();
    foreach ($check as $param) {
-      if (!isset($origin[$param]) || empty($origin[$param])) {
+      if (!isset($origin[$param]) || (empty($origin[$param]) && $origin[$param] != 0)) {
          $missingParams[] = $param;
       }
    }
