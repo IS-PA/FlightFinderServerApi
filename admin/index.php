@@ -27,13 +27,13 @@ unset($airports_r);
    <head>
       <title>Admin Panel: Flight Finder</title>
       <meta charset="UTF-8">
-      <link rel="stylesheet" href="https://cdn.datatables.net/1.10.10/css/dataTables.jqueryui.min.css">
+      <link rel="stylesheet" href="//cdn.datatables.net/1.10.10/css/dataTables.jqueryui.min.css">
       <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
       <script src="//files.devpgsv.com/libs/jquery-ui-1.11.4.custom-BlackTie/jquery-ui.min.js"></script>
       <link rel="stylesheet" href="//files.devpgsv.com/libs/jquery-ui-1.11.4.custom-BlackTie/jquery-ui.css">
       <script src="../js/datepicker-es.js"></script>
-      <script src="https://cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
-      <script src="https://cdn.datatables.net/1.10.10/js/dataTables.jqueryui.min.js"></script>
+      <script src="//cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
+      <script src="//cdn.datatables.net/1.10.10/js/dataTables.jqueryui.min.js"></script>
       
       <style>
          .adminIcon {
@@ -102,14 +102,14 @@ unset($airports_r);
                   <form id="addFlight_form" method="post"><fieldset>\
                      <select name="origin" id="addFlight_form_select_origin" class="custom-jui-select" style="" required><option disabled selected> -- Select an origin -- </option><?php
                         foreach ($airports as $airport) {
-                           if (!$airport['id'] == 0) {
+                           if (!$airport['id'] == 0 || true) {
                               echo '<option value='.$airport['id'].'>'.htmlspecialchars($airport['displayname'], ENT_QUOTES)."</option>\\\n";
                            }
                         }
                      ?></select> <label for="addFlight_form_select_origin">Origin</label><br>\
                      <select name="destination" id="addFlight_form_select_destination" class="custom-jui-select" required><option disabled selected> -- Select a destination -- </option><?php
                         foreach ($airports as $airport) {
-                           if (!$airport['id'] == 0) {
+                           if (!$airport['id'] == 0 || true) {
                               echo '<option value='.$airport['id'].'>'.htmlspecialchars($airport['displayname'], ENT_QUOTES)."</option>\\\n";
                            }
                         }
@@ -224,14 +224,14 @@ unset($airports_r);
                   <form id="modifyFlight_form" method="post"><fieldset>\
                      <select name="origin" id="modifyFlight_form_select_origin" class="custom-jui-select" required><option disabled selected> -- Select an origin -- </option><?php
                         foreach ($airports as $airport) {
-                           if (!$airport['id'] == 0) {
+                           if (!$airport['id'] == 0 || true) {
                               echo '<option value='.$airport['id'].'>'.htmlspecialchars($airport['displayname'], ENT_QUOTES)."</option>\\\n";
                            }
                         }
                      ?></select> <label for="modifyFlight_form_select_origin">Origin</label><br>\
                      <select name="destination" id="modifyFlight_form_select_destination" class="custom-jui-select" required><option disabled selected> -- Select a destination -- </option><?php
                         foreach ($airports as $airport) {
-                           if (!$airport['id'] == 0) {
+                           if (!$airport['id'] == 0 || true) {
                               echo '<option value='.$airport['id'].'>'.htmlspecialchars($airport['displayname'], ENT_QUOTES)."</option>\\\n";
                            }
                         }
@@ -467,7 +467,7 @@ unset($airports_r);
                foreach ($flight['seats'] as $seat) {
                   if (!$seat) $availableSeats++;
                }
-               if ($flight['id'] == 0) continue;
+               if ($flight['id'] == 0) ;//continue;
                echo '<tr>'
                         . '<td><a name="flight-'. $flight['id'] .'"></a>'. $flight['id'] ."</td>\n"
                         . '<td><a class="infolink" href="#airport-'.$flight['origin'].'">['.$flight['origin'].']'. getAirportNameById($flight['origin'], $airports) .' ('.getAirportCountryById($flight['origin'], $airports).")</a></td>\n"
@@ -506,7 +506,7 @@ unset($airports_r);
          <tbody>
             <?php
             foreach ($airports as $airport) {
-               if ($airport['id'] == 0) continue;
+               if ($airport['id'] == 0) ;//continue;
                echo '<tr>'
                         . '<td><a name="airport-'. $airport['id'] .'"></a>'. $airport['id'] ."</td>\n"
                         . '<td>'. $airport['country'] ."</td>\n"

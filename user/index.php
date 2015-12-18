@@ -23,7 +23,7 @@ unset($airports_r);
 
 session_start();
 
-$_POST['password'] = 'password';
+//$_POST['password'] = 'password';
 
 if (!isset($_SESSION['loggedin']) || empty($_SESSION['loggedin'])) $_SESSION['loggedin'] = false;
 if (isset($_GET['login']) && isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['password']) && !empty($_POST['password'])) {
@@ -32,8 +32,7 @@ if (isset($_GET['login']) && isset($_POST['username']) && !empty($_POST['usernam
    $stmt->execute();
    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
    if (count($users) == 1) {
-      // Check password
-      if (true) {
+      if ($users[0]['password'] == hash('sha256', $_POST['password'])) {
          $_SESSION['loggedin'] = true;
          $_SESSION['userid'] = $users[0]['id'];
       }
@@ -78,16 +77,16 @@ exit();
    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
    <link rel="icon" href="favicon.ico" type="image/x-icon">
 
-   <link rel="stylesheet" href="https://cdn.datatables.net/1.10.10/css/dataTables.jqueryui.min.css">
+   <link rel="stylesheet" href="//cdn.datatables.net/1.10.10/css/dataTables.jqueryui.min.css">
    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-   <script src="http://files.devpgsv.com/libs/jquery-ui-1.11.4.custom-DarkHive/jquery-ui.min.js"></script>
-   <link rel="stylesheet" href="http://files.devpgsv.com/libs/jquery-ui-1.11.4.custom-DarkHive/jquery-ui.css">
+   <script src="https://files.devpgsv.com/libs/jquery-ui-1.11.4.custom-DarkHive/jquery-ui.min.js"></script>
+   <link rel="stylesheet" href="//files.devpgsv.com/libs/jquery-ui-1.11.4.custom-DarkHive/jquery-ui.css">
    <script src="../js/datepicker-es.js"></script>
-   <script src="https://cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
-   <script src="https://cdn.datatables.net/1.10.10/js/dataTables.jqueryui.min.js"></script>
+   <script src="//cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
+   <script src="//cdn.datatables.net/1.10.10/js/dataTables.jqueryui.min.js"></script>
    <style>
       body {
-         background-image: url("http://hdwallpapersfit.com/wp-content/uploads/2015/02/whatsapp-green-wallpapers.png");
+         background-image: url("https://files.devpgsv.com/public/img/whatsapp-green-wallpapers.png");
          background-color: #464646;
          color: #ffffff;
          padding: 0;
@@ -219,7 +218,7 @@ exit();
             ]
          });
          $('#airports').dataTable({
-            //'iDisplayLength': 100,
+            'iDisplayLength': 100,
             "order": [[ 0, "asc" ]],
             "aoColumnDefs": [
                {
@@ -408,7 +407,7 @@ exit();
          <form action="?login" method="POST">
             <fieldset style="border: none;">
                <input type="text" class="custom-jui-textbox" name="username" id="loginform_username" placeholder="Username" title="Username" autocomplete="off">
-               <!--<br><input type="text" class="custom-jui-textbox" name="password" id="loginform_password" placeholder="Password" title="Password">-->
+               <br><input type="password" class="custom-jui-textbox" name="password" id="loginform_password" placeholder="Password" title="Password">
                <br><input type="submit" id="loginButton" class="custom-jui-button" value="Login" style="padding:20px 40px 20px 40px;">
             </fieldset>
          </form>
@@ -550,7 +549,7 @@ exit();
                   foreach ($user['buyedFlights'] as $flightId => $seatsBuyed) {
                      $flight = $flights[$flightId];
                      $flight['seats'] = json_decode($flight['seats'], true);
-                     if ($flight['id'] == 0) continue;
+                     if ($flight['id'] == 0) ;//continue;
                      echo '<tr>'
                               . '<td><p>'. $flight['id'] ."</p></td>\n"
                               . '<td><p class="infolink" data-tooltip="[Id: '.$flight['origin']."]<br/>". getAirportNameById($flight['origin'], $airports) ."\n(".getAirportCountryById($flight['origin'], $airports).')">'.getAirportNameById($flight['origin'], $airports).'</p></td>'
